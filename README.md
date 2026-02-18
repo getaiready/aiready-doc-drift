@@ -1,13 +1,16 @@
 # @aiready/components
 
+[![npm](https://img.shields.io/npm/v/@aiready/components)](https://www.npmjs.com/package/@aiready/components) [![GitHub](https://img.shields.io/badge/GitHub-aiready--components-blue?logo=github)](https://github.com/caopengau/aiready-components)
+
 Unified shared components library (UI, charts, hooks, utilities) for AIReady.
 
 ## Features
 
-- 🎨 **UI Components**: Button, Card, Input, Label, Badge (shadcn/ui based)
-- 📊 **D3 Charts**: Coming in Phase 2 (LineChart, BarChart, ForceGraph)
-- 🪝 **React Hooks**: Coming in Phase 3 (useDebounce, useTheme, useD3)
-- 🛠️ **Utilities**: className merging, formatters, color schemes
+- 🎨 **UI Components**: Button, Card, Input, Label, Badge, Container, Grid, Stack, Separator (shadcn/ui based)
+- 🗂️ **Form Components**: Select, Checkbox, RadioGroup, Switch, Textarea
+- 📊 **D3 Charts**: ForceDirectedGraph with physics-based layout and interactive controls
+- 🪝 **React Hooks**: `useDebounce`, `useD3`, `useForceSimulation`
+- 🛠️ **Utilities**: `cn` (className merging), formatters, color schemes
 - 🌙 **Dark Mode**: Built-in support via Tailwind CSS
 - 🎯 **Tree-shakeable**: Granular exports for optimal bundle size
 - 📦 **TypeScript**: Full type safety
@@ -220,16 +223,19 @@ pnpm test
 - [x] TypeScript setup
 - [x] Build system (tsup)
 
-### Phase 2: Extended UI + Charts (Week 2)
-- [ ] Layout components (Container, Grid, Stack)
-- [ ] Interactive components (Modal, Dropdown, Tabs, Tooltip)
-- [ ] Form components (Select, Checkbox, Radio, Switch)
-- [ ] D3 Charts (LineChart, BarChart, ScatterPlot)
+### Phase 2: Extended UI + Charts ✅ COMPLETE
+- [x] Layout components (Container, Grid, Stack, Separator)
+- [x] Form components (Select, Checkbox, RadioGroup, Switch, Textarea)
+- [x] D3 Charts (ForceDirectedGraph with physics-based layout)
 
-### Phase 3: Advanced Charts + Utilities (Week 3)
-- [ ] Advanced charts (ForceGraph, HeatMap, TreeMap)
-- [ ] React hooks (useD3, useDebounce, useTheme)
-- [ ] Utilities (formatters, color schemes)
+### Phase 3: Advanced Charts + Utilities ✅ COMPLETE
+- [x] ForceDirectedGraph with interactive controls and dark/light mode
+- [x] React hooks (`useD3`, `useDebounce`, `useForceSimulation`)
+- [x] Utilities (`cn`, formatters, color schemes)
+
+### Phase 4: Future (Planned)
+- [ ] Additional D3 charts (LineChart, BarChart, HeatMap, TreeMap)
+- [ ] Interactive components (Modal, Dropdown, Tabs, Tooltip)
 
 ## License
 
