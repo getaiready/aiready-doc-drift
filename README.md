@@ -7,7 +7,7 @@
 
 ## Overview
 
-The **Documentation Drift** analyzer combines AST parsing with git log traversal to identify instances where comments are likely lagging behind actual implementation logic. 
+The **Documentation Drift** analyzer combines AST parsing with git log traversal to identify instances where comments are likely lagging behind actual implementation logic.
 
 ## 🏛️ Architecture
 

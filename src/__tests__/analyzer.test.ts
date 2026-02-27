@@ -13,7 +13,9 @@ describe('Doc Drift Analyzer', () => {
 
     // File with signature mismatch
     const file1 = join(tmpDir, 'file1.ts');
-    writeFileSync(file1, `
+    writeFileSync(
+      file1,
+      `
 /**
  * Adds numbers.
  * @param a First number
@@ -21,11 +23,14 @@ describe('Doc Drift Analyzer', () => {
 export function add(a: number, b: number) {
   return a + b;
 }
-    `);
+    `
+    );
 
     // File with undocumented complexity (simulated by lines > 20)
     const file2 = join(tmpDir, 'file2.ts');
-    writeFileSync(file2, `
+    writeFileSync(
+      file2,
+      `
 export function complexFunction(data: any) {
   let result = 0;
   for (let i = 0; i < 10; i++) {
@@ -51,7 +56,8 @@ export function complexFunction(data: any) {
   }
   return result;
 }
-    `);
+    `
+    );
   });
 
   afterAll(() => {
@@ -72,6 +78,6 @@ export function complexFunction(data: any) {
     expect(report.rawData.undocumentedComplexity).toBe(1);
 
     expect(report.issues.length).toBeGreaterThan(0);
-    expect(report.issues.some(i => i.message.includes('b'))).toBe(true);
+    expect(report.issues.some((i) => i.message.includes('b'))).toBe(true);
   });
 });

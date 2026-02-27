@@ -7,24 +7,43 @@ import type { TSESTree } from '@typescript-eslint/types';
 import { execSync } from 'child_process';
 
 const SRC_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx']);
-const DEFAULT_EXCLUDES = ['node_modules', 'dist', '.git', 'coverage', '.turbo', 'build'];
+const DEFAULT_EXCLUDES = [
+  'node_modules',
+  'dist',
+  '.git',
+  'coverage',
+  '.turbo',
+  'build',
+];
 
-function collectFiles(dir: string, options: DocDriftOptions, depth = 0): string[] {
+function collectFiles(
+  dir: string,
+  options: DocDriftOptions,
+  depth = 0
+): string[] {
   if (depth > 20) return [];
   const excludes = [...DEFAULT_EXCLUDES, ...(options.exclude ?? [])];
   let entries: string[];
-  try { entries = readdirSync(dir); } catch { return []; }
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return [];
+  }
 
   const files: string[] = [];
   for (const entry of entries) {
-    if (excludes.some(ex => entry === ex || entry.includes(ex))) continue;
+    if (excludes.some((ex) => entry === ex || entry.includes(ex))) continue;
     const full = join(dir, entry);
     let stat;
-    try { stat = statSync(full); } catch { continue; }
+    try {
+      stat = statSync(full);
+    } catch {
+      continue;
+    }
     if (stat.isDirectory()) {
       files.push(...collectFiles(full, options, depth + 1));
     } else if (stat.isFile() && SRC_EXTENSIONS.has(extname(full))) {
-      if (!options.include || options.include.some(p => full.includes(p))) {
+      if (!options.include || options.include.some((p) => full.includes(p))) {
         files.push(full);
       }
     }
@@ -32,13 +51,20 @@ function collectFiles(dir: string, options: DocDriftOptions, depth = 0): string[
   return files;
 }
 
-function getLineRangeLastModified(file: string, startLine: number, endLine: number): number {
+function getLineRangeLastModified(
+  file: string,
+  startLine: number,
+  endLine: number
+): number {
   try {
     // format %ct is committer date, UNIX timestamp
-    const output = execSync(`git log -1 --format=%ct -L ${startLine},${endLine}:"${file}"`, {
-      encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'ignore']
-    });
+    const output = execSync(
+      `git log -1 --format=%ct -L ${startLine},${endLine}:"${file}"`,
+      {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }
+    );
     const match = output.trim().split('\n')[0];
     if (match && !isNaN(parseInt(match, 10))) {
       return parseInt(match, 10);
@@ -50,7 +76,7 @@ function getLineRangeLastModified(file: string, startLine: number, endLine: numb
 }
 
 export async function analyzeDocDrift(
-  options: DocDriftOptions,
+  options: DocDriftOptions
 ): Promise<DocDriftReport> {
   const rootDir = options.rootDir;
   const files = collectFiles(rootDir, options);
@@ -67,7 +93,11 @@ export async function analyzeDocDrift(
 
   for (const file of files) {
     let code: string;
-    try { code = readFileSync(file, 'utf-8'); } catch { continue; }
+    try {
+      code = readFileSync(file, 'utf-8');
+    } catch {
+      continue;
+    }
 
     let ast: TSESTree.Program;
     try {
@@ -76,22 +106,36 @@ export async function analyzeDocDrift(
         loc: true,
         comment: true,
       });
-    } catch { continue; }
+    } catch {
+      continue;
+    }
 
     const comments = ast.comments || [];
 
     for (const node of ast.body) {
-      if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') {
+      if (
+        node.type === 'ExportNamedDeclaration' ||
+        node.type === 'ExportDefaultDeclaration'
+      ) {
         const decl = (node as any).declaration;
         if (!decl) continue;
 
         // Count exports
-        if (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration' || decl.type === 'VariableDeclaration') {
+        if (
+          decl.type === 'FunctionDeclaration' ||
+          decl.type === 'ClassDeclaration' ||
+          decl.type === 'VariableDeclaration'
+        ) {
           totalExports++;
 
           // Find associated JSDoc comment (immediately preceding the export)
           const nodeLine = node.loc.start.line;
-          const jsdocs = comments.filter((c: any) => c.type === 'Block' && c.value.startsWith('*') && c.loc.end.line === nodeLine - 1);
+          const jsdocs = comments.filter(
+            (c: any) =>
+              c.type === 'Block' &&
+              c.value.startsWith('*') &&
+              c.loc.end.line === nodeLine - 1
+          );
 
           if (jsdocs.length === 0) {
             uncommentedExports++;
@@ -107,35 +151,52 @@ export async function analyzeDocDrift(
 
             // Signature mismatch detection
             if (decl.type === 'FunctionDeclaration') {
-              const params = decl.params.map((p: any) => p.name || (p.left && p.left.name)).filter(Boolean);
-              const paramTags = Array.from(jsdocText.matchAll(/@param\s+(?:\{[^}]+\}\s+)?([a-zA-Z0-9_]+)/g)).map((m: any) => m[1]);
+              const params = decl.params
+                .map((p: any) => p.name || (p.left && p.left.name))
+                .filter(Boolean);
+              const paramTags = Array.from(
+                jsdocText.matchAll(/@param\s+(?:\{[^}]+\}\s+)?([a-zA-Z0-9_]+)/g)
+              ).map((m: any) => m[1]);
 
-              const missingParams = params.filter((p: string) => !paramTags.includes(p));
+              const missingParams = params.filter(
+                (p: string) => !paramTags.includes(p)
+              );
               if (missingParams.length > 0) {
                 outdatedComments++;
                 issues.push({
                   type: 'doc-drift',
                   severity: 'major',
                   message: `JSDoc @param mismatch: function has parameters (${missingParams.join(', ')}) not documented in JSDoc.`,
-                  location: { file, line: nodeLine }
+                  location: { file, line: nodeLine },
                 });
                 continue; // already counted as outdated
               }
             }
 
             // Timestamp comparison
-            const commentModified = getLineRangeLastModified(file, jsdoc.loc.start.line, jsdoc.loc.end.line);
-            const bodyModified = getLineRangeLastModified(file, decl.loc.start.line, decl.loc.end.line);
+            const commentModified = getLineRangeLastModified(
+              file,
+              jsdoc.loc.start.line,
+              jsdoc.loc.end.line
+            );
+            const bodyModified = getLineRangeLastModified(
+              file,
+              decl.loc.start.line,
+              decl.loc.end.line
+            );
 
             if (commentModified > 0 && bodyModified > 0) {
               // If body was modified much later than the comment, and comment is older than staleMonths
-              if (now - commentModified > staleSeconds && bodyModified - commentModified > staleSeconds / 2) {
+              if (
+                now - commentModified > staleSeconds &&
+                bodyModified - commentModified > staleSeconds / 2
+              ) {
                 outdatedComments++;
                 issues.push({
                   type: 'doc-drift',
                   severity: 'minor',
                   message: `JSDoc is significantly older than the function body implementation. Code may have drifted.`,
-                  location: { file, line: jsdoc.loc.start.line }
+                  location: { file, line: jsdoc.loc.start.line },
                 });
               }
             }
@@ -149,7 +210,7 @@ export async function analyzeDocDrift(
     uncommentedExports,
     totalExports,
     outdatedComments,
-    undocumentedComplexity
+    undocumentedComplexity,
   });
 
   return {
