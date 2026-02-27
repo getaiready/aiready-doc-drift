@@ -6,7 +6,10 @@ import * as fs from 'fs';
 import { analyzeChangeAmplification } from './analyzer';
 import type { ChangeAmplificationOptions } from './types';
 
-export const changeAmplificationAction = async (directory: string, options: any) => {
+export const changeAmplificationAction = async (
+  directory: string,
+  options: any
+) => {
   try {
     const resolvedDir = path.resolve(process.cwd(), directory);
     const finalOptions: ChangeAmplificationOptions = {
@@ -18,7 +21,8 @@ export const changeAmplificationAction = async (directory: string, options: any)
     const report = await analyzeChangeAmplification(finalOptions);
 
     if (options.output === 'json') {
-      const outputPath = options.outputFile || `change-amplification-report-${Date.now()}.json`;
+      const outputPath =
+        options.outputFile || `change-amplification-report-${Date.now()}.json`;
       fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
       return;
     }
@@ -41,16 +45,24 @@ export const changeAmplificationAction = async (directory: string, options: any)
       for (const result of report.results) {
         console.log(`\n📄 ${chalk.cyan(result.fileName)}`);
         for (const issue of result.issues) {
-          const color = issue.severity === 'critical' ? chalk.red : chalk.yellow;
+          const color =
+            issue.severity === 'critical' ? chalk.red : chalk.yellow;
           console.log(`  ${color('■')} ${issue.message}`);
           console.log(`    ${chalk.dim('Suggestion: ' + issue.suggestion)}`);
         }
       }
     } else {
-      console.log(chalk.green('\n✨ No change amplification issues found. Architecture is well contained.'));
+      console.log(
+        chalk.green(
+          '\n✨ No change amplification issues found. Architecture is well contained.'
+        )
+      );
     }
   } catch (error) {
-    console.error(chalk.red('Error during change amplification analysis:'), error);
+    console.error(
+      chalk.red('Error during change amplification analysis:'),
+      error
+    );
     process.exit(1);
   }
 };

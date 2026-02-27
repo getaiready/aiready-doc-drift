@@ -1,8 +1,6 @@
 import type { ScanOptions, Issue } from '@aiready/core';
 
-export interface ChangeAmplificationOptions extends ScanOptions {
-  // Add any specific configurations needed for change amplification here
-}
+export type ChangeAmplificationOptions = ScanOptions;
 
 export interface ChangeAmplificationIssue extends Issue {
   type: 'change-amplification';

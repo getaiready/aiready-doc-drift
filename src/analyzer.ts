@@ -2,30 +2,48 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { globSync } from 'glob';
 import { calculateChangeAmplification } from '@aiready/core';
-import type { ChangeAmplificationOptions, ChangeAmplificationReport, FileChangeAmplificationResult, ChangeAmplificationIssue } from './types';
+import type {
+  ChangeAmplificationOptions,
+  ChangeAmplificationReport,
+  FileChangeAmplificationResult,
+  ChangeAmplificationIssue,
+} from './types';
 import { getParser } from '@aiready/core';
 
-function collectFiles(dir: string, options: ChangeAmplificationOptions): string[] {
-  const includePatterns = options.include && options.include.length > 0 ? options.include : ['**/*.{ts,tsx,js,jsx,py,go}'];
-  const excludePatterns = options.exclude && options.exclude.length > 0 ? options.exclude : ['**/node_modules/**', '**/dist/**', '**/.git/**'];
+function collectFiles(
+  dir: string,
+  options: ChangeAmplificationOptions
+): string[] {
+  const includePatterns =
+    options.include && options.include.length > 0
+      ? options.include
+      : ['**/*.{ts,tsx,js,jsx,py,go}'];
+  const excludePatterns =
+    options.exclude && options.exclude.length > 0
+      ? options.exclude
+      : ['**/node_modules/**', '**/dist/**', '**/.git/**'];
 
   let matchedFiles: string[] = [];
   for (const pattern of includePatterns) {
-    const files = globSync(pattern, { cwd: dir, ignore: excludePatterns, absolute: true });
+    const files = globSync(pattern, {
+      cwd: dir,
+      ignore: excludePatterns,
+      absolute: true,
+    });
     matchedFiles = matchedFiles.concat(files);
   }
   return [...new Set(matchedFiles)];
 }
 
 export async function analyzeChangeAmplification(
-  options: ChangeAmplificationOptions,
+  options: ChangeAmplificationOptions
 ): Promise<ChangeAmplificationReport> {
   const rootDir = path.resolve(options.rootDir || '.');
   const files = collectFiles(rootDir, options);
 
   // Compute graph metrics: fanIn and fanOut
   const dependencyGraph = new Map<string, string[]>(); // key: file, value: imported files
-  const reverseGraph = new Map<string, string[]>();    // key: file, value: files that import it
+  const reverseGraph = new Map<string, string[]>(); // key: file, value: files that import it
 
   // Initialize graph
   for (const file of files) {
@@ -41,7 +59,7 @@ export async function analyzeChangeAmplification(
 
       const content = fs.readFileSync(file, 'utf8');
       const parseResult = parser.parse(content, file);
-      const dependencies = parseResult.imports.map(i => i.source);
+      const dependencies = parseResult.imports.map((i) => i.source);
 
       for (const dep of dependencies) {
         // Resolve simple relative or absolute imports for the graph
@@ -49,7 +67,7 @@ export async function analyzeChangeAmplification(
         const depDir = path.dirname(file);
 
         // Find if this dependency resolves to one of our mapped files
-        const resolvedPath = files.find(f => {
+        const resolvedPath = files.find((f) => {
           if (dep.startsWith('.')) {
             return f.startsWith(path.resolve(depDir, dep));
           } else {
@@ -63,11 +81,11 @@ export async function analyzeChangeAmplification(
         }
       }
     } catch (err) {
-      // Ignore parse errors silently
+      void err;
     }
   }
 
-  const fileMetrics = files.map(file => {
+  const fileMetrics = files.map((file) => {
     const fanOut = dependencyGraph.get(file)?.length || 0;
     const fanIn = reverseGraph.get(file)?.length || 0;
     return { file, fanOut, fanIn };
@@ -85,7 +103,7 @@ export async function analyzeChangeAmplification(
         severity: hotspot.amplificationFactor > 40 ? 'critical' : 'major',
         message: `High change amplification detected (Factor: ${hotspot.amplificationFactor}). Changes here cascade heavily.`,
         location: { file: hotspot.file, line: 1 },
-        suggestion: `Reduce coupling. Fan-out is ${hotspot.fanOut}, Fan-in is ${hotspot.fanIn}.`
+        suggestion: `Reduce coupling. Fan-out is ${hotspot.fanOut}, Fan-in is ${hotspot.fanIn}.`,
       });
     }
 
@@ -96,7 +114,7 @@ export async function analyzeChangeAmplification(
         issues,
         metrics: {
           aiSignalClarityScore: 100 - hotspot.amplificationFactor, // Just a rough score
-        }
+        },
       });
     }
   }
@@ -105,8 +123,15 @@ export async function analyzeChangeAmplification(
     summary: {
       totalFiles: files.length,
       totalIssues: results.reduce((sum, r) => sum + r.issues.length, 0),
-      criticalIssues: results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'critical').length, 0),
-      majorIssues: results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'major').length, 0),
+      criticalIssues: results.reduce(
+        (sum, r) =>
+          sum + r.issues.filter((i) => i.severity === 'critical').length,
+        0
+      ),
+      majorIssues: results.reduce(
+        (sum, r) => sum + r.issues.filter((i) => i.severity === 'major').length,
+        0
+      ),
       score: riskResult.score,
       rating: riskResult.rating,
       recommendations: riskResult.recommendations,

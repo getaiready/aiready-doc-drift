@@ -7,7 +7,7 @@
 
 ## Overview
 
-High architectural coupling is one of the leading causes of AI agent failure. When an agent modifies a "bottleneck" file with dozens of dependents, the resulting cascade of breakages often exceeds the agent's context window or reasoning capacity. 
+High architectural coupling is one of the leading causes of AI agent failure. When an agent modifies a "bottleneck" file with dozens of dependents, the resulting cascade of breakages often exceeds the agent's context window or reasoning capacity.
 
 The **Change Amplification** analyzer computes graph metrics (fan-in, fan-out, and centrality) to identify these high-risk areas before they cause an "edit explosion."
 
