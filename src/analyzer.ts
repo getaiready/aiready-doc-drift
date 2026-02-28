@@ -1,6 +1,5 @@
 import {
   scanFiles,
-  readFileContent,
   calculateDocDrift,
   getFileCommitTimestamps,
   getLineRangeLastModifiedCached,
@@ -13,11 +12,9 @@ import type { TSESTree } from '@typescript-eslint/types';
 export async function analyzeDocDrift(
   options: DocDriftOptions
 ): Promise<DocDriftReport> {
-  const rootDir = options.rootDir;
   // Use core scanFiles which respects .gitignore recursively
   const files = await scanFiles(options);
   const issues: DocDriftIssue[] = [];
-  const results: DocDriftIssue[] = [];
   const staleMonths = options.staleMonths ?? 6;
   const staleSeconds = staleMonths * 30 * 24 * 60 * 60;
 
