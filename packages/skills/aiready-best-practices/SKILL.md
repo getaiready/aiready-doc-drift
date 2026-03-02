@@ -1,6 +1,15 @@
+---
+name: aiready-best-practices
+description: Guidelines for writing AI-friendly code. Detects semantic duplicates, context fragmentation, naming inconsistencies. Use when writing new code, reviewing PRs, refactoring for AI adoption, or debugging AI assistant confusion. Helps minimize context waste and improve AI comprehension.
+license: MIT
+metadata:
+  author: aiready
+  version: '0.2.2'
+---
+
 # AIReady Best Practices
 
-This skill provides guidelines and tools for maintaining an AI-friendly codebase. It is composed of modular rule sets that are compiled into a consolidated instruction set for agents.
+Guidelines for writing AI-friendly codebases that AI coding assistants can understand and maintain effectively. Based on analysis of thousands of repositories and common AI model failure patterns. Covers pattern detection, AI signal clarity, context optimization, change amplification, agent grounding, consistency checking, documentation, testability, and dependency management.
 
 ## Core Capabilities
 
