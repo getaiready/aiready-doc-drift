@@ -20,7 +20,7 @@ deploy-landing: verify-aws-account ## Deploy landing page to AWS (dev environmen
 		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
 		export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && \
 		export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" && \
-		sst deploy
+		sst deploy --yes
 	@$(call log_success,Landing page deployed to dev)
 
 deploy-landing-prod: verify-aws-account ## Deploy landing page to AWS (production)
@@ -34,7 +34,7 @@ deploy-landing-prod: verify-aws-account ## Deploy landing page to AWS (productio
 		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
 		export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && \
 		export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" && \
-		sst deploy --stage production
+		sst deploy --stage production --yes
 	@$(call log_success,Landing page deployed to production)
 	@echo "$(CYAN)💡 Blog files synced during build, CloudFront invalidated automatically$(NC)"
 	@echo ""
@@ -54,7 +54,7 @@ landing-verify: ## Verify site is accessible
 deploy-landing-remove: ## Remove landing page deployment (dev)
 	@$(call log_warning,Removing landing page deployment from AWS (dev))
 	@cd landing && \
-		AWS_PROFILE=$(AWS_PROFILE) AWS_REGION=$(AWS_REGION) sst remove
+		AWS_PROFILE=$(AWS_PROFILE) AWS_REGION=$(AWS_REGION) sst remove --yes
 	@$(call log_success,Landing page deployment removed)
 
 landing-logs: ## Show landing page logs (requires SST dashboard)
@@ -101,7 +101,7 @@ deploy-platform-remove: ## Remove platform deployment (dev)
 	@cd platform && \
 		set -a && [ -f .env.dev ] && . ./.env.dev || true && set +a && \
 		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		AWS_PROFILE=$(AWS_PROFILE) pnpm sst:remove
+		AWS_PROFILE=$(AWS_PROFILE) pnpm sst:remove --yes
 	@$(call log_success,Platform deployment removed)
 
 platform-logs: ## Show platform logs (requires SST dev mode)

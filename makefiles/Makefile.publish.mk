@@ -39,6 +39,10 @@ endef
 npm-check: ## Check npm login status
 	@$(call log_step,Checking npm authentication...)
 	@if ! npm whoami >/dev/null 2>&1; then \
+		if [ "$(shell [ -n "$$CI" ] || [ -n "$$GITHUB_ACTIONS" ] && echo "true" || echo "false")" = "true" ]; then \
+			$(call log_error,Not logged into npm in CI environment. Aborting.); \
+			exit 1; \
+		fi; \
 		$(call log_error,Not logged into npm. Prompting for login...); \
 		echo ""; \
 		printf "Would you like to login now? (Y/n): "; \
@@ -267,7 +271,7 @@ publish-platform: ## Publish platform to GitHub. Usage: make publish-platform [O
 	git push -f "$$remote" "$$branch:$$target_branch"; \
 	$(call log_success,Synced platform to GitHub repo ($$target_branch)); \
 	platform_tag="v$$platform_version"; \
-	git tag -f "$$platform_tag" "$$split_commit" 2>/dev/null || true; \
+	git tag -f "$$platform_tag" "$$split_commit" -m "Release platform v$$platform_version" 2>/dev/null || true; \
 	git push -f "$$remote" "$$platform_tag"; \
 	$(call log_success,Platform tag pushed: $$platform_tag)
 
@@ -310,7 +314,7 @@ publish-landing: ## Publish landing page to GitHub. Usage: make publish-landing 
 	$(call log_success,Synced landing page to GitHub repo ($$target_branch)); \
 	$(call log_step,Tagging landing repo commit with v$$landing_version...); \
 	landing_tag="v$$landing_version"; \
-	git tag -f "$$landing_tag" "$$split_commit" 2>/dev/null || true; \
+	git tag -f "$$landing_tag" "$$split_commit" -m "Release landing v$$landing_version" 2>/dev/null || true; \
 	git push -f "$$remote" "$$landing_tag"; \
 	$(call log_success,Landing tag pushed: $$landing_tag)
 

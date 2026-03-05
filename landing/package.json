@@ -9,8 +9,8 @@
     "lint": "eslint app components lib content scripts e2e",
     "clean": "rm -rf .next out",
     "test:e2e": "playwright test",
-    "deploy:sst": "sst deploy",
-    "deploy:sst:prod": "sst deploy --stage production"
+    "deploy:sst": "sst deploy --yes",
+    "deploy:sst:prod": "sst deploy --stage production --yes"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.659.0",

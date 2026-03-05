@@ -72,12 +72,12 @@ test-verify-cli: ## Run a smoke scan and verify CLI output
 
 test-landing-e2e: ## Run E2E tests for landing page
 	@$(call log_step,Running landing page E2E tests...)
-	@cd landing && $(PNPM) test:e2e
+	@cd landing && $(PNPM) exec playwright test --reporter=list
 	@$(call log_success,Landing page E2E tests passed)
 
 test-landing-e2e-local: ## Run landing E2E tests against local dev server
 	@$(call log_step,Running landing E2E tests against local dev server...)
-	@cd landing && $(PNPM) test:e2e
+	@cd landing && $(PNPM) exec playwright test --reporter=list
 	@$(call log_success,Landing local E2E tests passed)
 
 test-platform-e2e: ## Run Playwright E2E tests for platform against dev endpoint

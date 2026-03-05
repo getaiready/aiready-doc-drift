@@ -11,10 +11,10 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "deploy": "sst deploy --stage dev",
-    "deploy:prod": "sst deploy --stage prod",
-    "remove": "sst remove --stage dev",
-    "remove:local": "sst remove --stage local"
+    "deploy": "sst deploy --stage dev --yes",
+    "deploy:prod": "sst deploy --stage prod --yes",
+    "remove": "sst remove --stage dev --yes",
+    "remove:local": "sst remove --stage local --yes"
   },
   "dependencies": {
     "@aiready/cli": "workspace:*",
