@@ -60,7 +60,13 @@ export async function GET(
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'ResourceNotFoundException') {
+      return new NextResponse(
+        'Repository not found (Database not configured)',
+        { status: 404 }
+      );
+    }
     console.error('Badge API error:', error);
     return new NextResponse('Internal server error', { status: 500 });
   }

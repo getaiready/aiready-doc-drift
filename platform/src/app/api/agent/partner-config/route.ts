@@ -40,7 +40,13 @@ export async function GET(request: NextRequest) {
     const config = configs[partner] || configs.cline;
 
     return NextResponse.json(config);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'ResourceNotFoundException') {
+      return NextResponse.json(
+        { error: 'Repository not found (Database not configured)' },
+        { status: 404 }
+      );
+    }
     console.error('Partner Config API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
