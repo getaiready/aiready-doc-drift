@@ -1,26 +1,37 @@
-import type { Severity } from '../context-rules';
+import { Severity } from '@aiready/core';
 
 export type PatternType =
-  | 'function'
-  | 'class-method'
   | 'api-handler'
   | 'validator'
   | 'utility'
+  | 'class-method'
   | 'component'
+  | 'function'
   | 'unknown';
+
+export interface CodeBlock {
+  file: string;
+  startLine: number;
+  endLine: number;
+  code: string;
+  tokens: number;
+  patternType: PatternType;
+  signature?: string;
+  hash?: string;
+}
 
 export interface DuplicatePattern {
   file1: string;
-  file2: string;
   line1: number;
-  line2: number;
   endLine1: number;
+  file2: string;
+  line2: number;
   endLine2: number;
+  code1: string;
+  code2: string;
   similarity: number;
-  snippet: string;
   patternType: PatternType;
   tokenCost: number;
-  linesOfCode: number;
   severity: Severity;
   reason?: string;
   suggestion?: string;
@@ -35,22 +46,10 @@ export interface FileContent {
 export interface DetectionOptions {
   minSimilarity: number;
   minLines: number;
-  batchSize?: number;
-  approx?: boolean;
-  minSharedTokens?: number;
-  maxCandidatesPerBlock?: number;
-  maxComparisons?: number;
-  streamResults?: boolean;
+  batchSize: number;
+  approx: boolean;
+  minSharedTokens: number;
+  maxCandidatesPerBlock: number;
+  streamResults: boolean;
   onProgress?: (processed: number, total: number, message: string) => void;
-}
-
-export interface CodeBlock {
-  content: string;
-  startLine: number;
-  endLine: number;
-  file: string;
-  normalized: string;
-  patternType: PatternType;
-  tokenCost: number;
-  linesOfCode: number;
 }

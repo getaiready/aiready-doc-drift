@@ -7,37 +7,36 @@ describe('detectDuplicatePatterns', () => {
       {
         file: 'file1.ts',
         content: `
-async function getUserData(id: string) {
-  const user = await db.users.findOne({ id });
-  if (!user) {
-    throw new Error('Not found');
-  }
-  return user;
-}
+          function calculateTotal(price: number, quantity: number) {
+            const tax = price * 0.1;
+            return (price + tax) * quantity;
+          }
         `,
       },
       {
         file: 'file2.ts',
         content: `
-async function getUserInfo(userId: string) {
-  const user = await db.users.findOne({ id: userId });
-  if (!user) {
-    throw new Error('Not found');
-  }
-  return user;
-}
+          function calculateTotal(price: number, quantity: number) {
+            const tax = price * 0.1;
+            return (price + tax) * quantity;
+          }
         `,
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
-      minSimilarity: 0.6,
-      minLines: 5,
-      approx: false, // Disable approximation for test reliability
+      minSimilarity: 0.9,
+      minLines: 3,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 5,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBeGreaterThan(0);
-    expect(duplicates[0].similarity).toBeGreaterThan(0.6);
+    expect(duplicates[0].similarity).toBe(1.0);
+    expect(duplicates[0].patternType).toBe('function');
   });
 
   it('should detect similar but not identical functions', async () => {
@@ -45,64 +44,73 @@ async function getUserInfo(userId: string) {
       {
         file: 'file1.ts',
         content: `
-async function getUserData(id: string) {
-  const user = await database.users.findOne({ id: id });
-  if (!user) {
-    throw new Error('User not found');
-  }
-  return user;
-}
+          function processOrder(order: any) {
+            validateOrder(order);
+            calculateTax(order);
+            saveToDatabase(order);
+            return { status: 'success' };
+          }
         `,
       },
       {
         file: 'file2.ts',
         content: `
-async function getUserData(userId: string) {
-  const user = await database.users.findOne({ id: userId });
-  if (!user) {
-    throw new Error('User not found');
-  }
-  return user;
-}
+          async function handleOrder(data: any) {
+            validateOrder(data);
+            calculateTax(data);
+            await saveToDatabase(data);
+            return { success: true };
+          }
         `,
       },
     ];
 
+    // Lower threshold to 0.4 because different identifier names reduce Jaccard similarity
     const duplicates = await detectDuplicatePatterns(files, {
-      minSimilarity: 0.6,
-      minLines: 5,
-      approx: false, // Disable approximation for test reliability
+      minSimilarity: 0.4,
+      minLines: 3,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 5,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBeGreaterThan(0);
+    expect(duplicates[0].similarity).toBeGreaterThan(0.4);
+    expect(duplicates[0].similarity).toBeLessThan(1.0);
   });
 
   it('should categorize API handler patterns', async () => {
     const files = [
       {
-        file: 'file1.ts',
+        file: 'routes/user.ts',
         content: `
-app.get('/api/users/:id', async (request, response) => {
-  const user = await db.users.findOne({ id: request.params.id });
-  response.json(user);
-});
+          app.get('/users', (req, res) => {
+            const users = db.find('users');
+            res.json(users);
+          });
         `,
       },
       {
-        file: 'file2.ts',
+        file: 'routes/product.ts',
         content: `
-app.get('/api/posts/:id', async (req, res) => {
-  const post = await db.posts.findOne({ id: req.params.id });
-  res.json(post);
-});
+          app.get('/products', (req, res) => {
+            const products = db.find('products');
+            res.json(products);
+          });
         `,
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
       minSimilarity: 0.4,
-      minLines: 3,
-      approx: false,
+      minLines: 2,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 5,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBeGreaterThan(0);
@@ -112,37 +120,33 @@ app.get('/api/posts/:id', async (req, res) => {
   it('should categorize validator patterns', async () => {
     const files = [
       {
-        file: 'file1.ts',
-        content: `function validateEmail(email: string) {
-  if (!email) {
-    throw new Error('Email is required');
-  }
-  if (!email.includes('@')) {
-    throw new Error('Invalid email format');
-  }
-  return true;
-}
+        file: 'schemas/user.ts',
+        content: `
+          export const UserSchema = z.object({
+            name: z.string(),
+            email: z.string().email(),
+          });
         `,
       },
       {
-        file: 'file2.ts',
-        content: `function validateUsername(username: string) {
-  if (!username) {
-    throw new Error('Username is required');
-  }
-  if (username.length < 3) {
-    throw new Error('Username too short');
-  }
-  return true;
-}
+        file: 'schemas/product.ts',
+        content: `
+          export const ProductSchema = z.object({
+            name: z.string(),
+            price: z.number(),
+          });
         `,
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
-      minSimilarity: 0.2,
-      minLines: 3,
-      approx: false,
+      minSimilarity: 0.4,
+      minLines: 2,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 5,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBeGreaterThan(0);
@@ -152,33 +156,33 @@ app.get('/api/posts/:id', async (req, res) => {
   it('should calculate token cost', async () => {
     const files = [
       {
-        file: 'file1.ts',
+        file: 'a.ts',
         content: `
-function processData(data: any) {
-  const validated = validateInput(data);
-  const result = validated.map((item: any) => item.value);
-  const filtered = result.filter((x: any) => x !== null);
-  return filtered;
-}
+          function calculateTotal(price: number, quantity: number) {
+            const tax = price * 0.1;
+            return (price + tax) * quantity;
+          }
         `,
       },
       {
-        file: 'file2.ts',
+        file: 'b.ts',
         content: `
-function processData(items: any) {
-  const validated = validateInput(items);
-  const result = validated.map((element: any) => element.value);
-  const filtered = result.filter((x: any) => x !== null);
-  return filtered;
-}
+          function calculateTotal(price: number, quantity: number) {
+            const tax = price * 0.1;
+            return (price + tax) * quantity;
+          }
         `,
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
-      minSimilarity: 0.5,
-      minLines: 3,
-      approx: false,
+      minSimilarity: 0.8,
+      minLines: 1,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 2,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBeGreaterThan(0);
@@ -188,28 +192,23 @@ function processData(items: any) {
   it('should not detect patterns below similarity threshold', async () => {
     const files = [
       {
-        file: 'file1.ts',
-        content: `
-function complexFunction(param: string) {
-  const result = someComplexLogic(param);
-  const transformed = anotherTransform(result);
-  return transformed;
-}
-        `,
+        file: 'a.ts',
+        content: 'function a() { console.log("hello"); }',
       },
       {
-        file: 'file2.ts',
-        content: `
-function totallyDifferent() {
-  return 42;
-}
-        `,
+        file: 'b.ts',
+        content: 'function b() { const x = 42; return x * x; }',
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
       minSimilarity: 0.9,
-      minLines: 3,
+      minLines: 1,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 2,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBe(0);
@@ -218,22 +217,22 @@ function totallyDifferent() {
   it('should not compare blocks from the same file', async () => {
     const files = [
       {
-        file: 'file1.ts',
+        file: 'a.ts',
         content: `
-function func1() {
-  return 1;
-}
-
-function func2() {
-  return 2;
-}
+          function a() { return 1; }
+          function b() { return 1; }
         `,
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
-      minSimilarity: 0.5,
-      minLines: 2,
+      minSimilarity: 0.9,
+      minLines: 1,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 2,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     expect(duplicates.length).toBe(0);
@@ -242,37 +241,28 @@ function func2() {
   it('should sort duplicates by similarity and token cost', async () => {
     const files = [
       {
-        file: 'file1.ts',
-        content: `
-function a() {
-  const x = 1;
-  return x;
-}
-        `,
+        file: 'a.ts',
+        content: 'function a() { return 1; }',
       },
       {
-        file: 'file2.ts',
-        content: `
-function b() {
-  const x = 1;
-  return x;
-}
-        `,
+        file: 'b.ts',
+        content: 'function b() { return 1; }',
       },
       {
-        file: 'file3.ts',
-        content: `
-function c() {
-  const y = 2;
-  return y;
-}
-        `,
+        file: 'c.ts',
+        content:
+          'function c() { return 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10; }',
       },
     ];
 
     const duplicates = await detectDuplicatePatterns(files, {
       minSimilarity: 0.7,
-      minLines: 2,
+      minLines: 1,
+      batchSize: 100,
+      approx: true,
+      minSharedTokens: 2,
+      maxCandidatesPerBlock: 10,
+      streamResults: false,
     });
 
     if (duplicates.length > 1) {

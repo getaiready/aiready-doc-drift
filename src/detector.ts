@@ -1,4 +1,4 @@
-import { estimateTokens } from '@aiready/core';
+import { estimateTokens, Severity } from '@aiready/core';
 import { calculateSeverity } from './context-rules';
 import type {
   DuplicatePattern,
@@ -7,133 +7,193 @@ import type {
   DetectionOptions,
   CodeBlock,
 } from './core/types';
-import { extractCodeBlocks } from './core/extractor';
-import { normalizeCode, tokenize } from './core/normalizer';
-import { jaccardSimilarity } from './core/similarity';
-import { ApproxEngine } from './core/approx-engine';
 
-export type {
-  DuplicatePattern,
-  PatternType,
-  FileContent,
-  DetectionOptions,
-  CodeBlock,
-};
-export { normalizeCode, tokenize, extractCodeBlocks, jaccardSimilarity };
+export type { PatternType, DuplicatePattern };
 
 /**
- * Detect duplicate patterns across files with enhanced analysis
+ * Standardize code for similarity comparison
+ */
+function normalizeCode(code: string): string {
+  return code
+    .replace(/\/\/.*/g, '') // remove single line comments
+    .replace(/\/\*[\s\S]*?\*\//g, '') // remove block comments
+    .replace(/['"`]/g, '"') // unify quotes
+    .replace(/\s+/g, ' ') // unify whitespace
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Split file content into logical blocks (functions, classes, methods)
+ */
+function extractBlocks(file: string, content: string): CodeBlock[] {
+  const blocks: CodeBlock[] = [];
+  const lines = content.split('\n');
+
+  // Regex to match declarations and app.get/post handlers
+  // Allow leading whitespace
+  const blockRegex =
+    /^\s*(?:export\s+)?(?:async\s+)?(function|class|const|interface|type)\s+([a-zA-Z0-9_]+)|^\s*(app\.(?:get|post|put|delete|patch|use))\(/gm;
+
+  let match;
+  while ((match = blockRegex.exec(content)) !== null) {
+    const startLine = content.substring(0, match.index).split('\n').length;
+
+    let type: string;
+    let name: string;
+
+    if (match[1]) {
+      type = match[1];
+      name = match[2];
+    } else {
+      type = 'handler';
+      name = match[3];
+    }
+
+    // Find end of block (matching braces heuristic)
+    let endLine = -1;
+    let openBraces = 0;
+    let foundStart = false;
+
+    for (let i = match.index; i < content.length; i++) {
+      if (content[i] === '{') {
+        openBraces++;
+        foundStart = true;
+      } else if (content[i] === '}') {
+        openBraces--;
+      }
+
+      if (foundStart && openBraces === 0) {
+        endLine = content.substring(0, i + 1).split('\n').length;
+        break;
+      }
+    }
+
+    if (endLine === -1) {
+      // Fallback: look for end of line
+      const remaining = content.slice(match.index);
+      const nextLineMatch = remaining.indexOf('\n');
+      if (nextLineMatch !== -1) {
+        endLine = startLine;
+      } else {
+        endLine = lines.length;
+      }
+    }
+
+    // Ensure at least 1 line
+    endLine = Math.max(startLine, endLine);
+
+    const blockCode = lines.slice(startLine - 1, endLine).join('\n');
+    const tokens = estimateTokens(blockCode);
+
+    blocks.push({
+      file,
+      startLine,
+      endLine,
+      code: blockCode,
+      tokens,
+      patternType: inferPatternType(type, name),
+    });
+  }
+
+  return blocks;
+}
+
+function inferPatternType(keyword: string, name: string): PatternType {
+  const n = name.toLowerCase();
+  if (
+    keyword === 'handler' ||
+    n.includes('handler') ||
+    n.includes('controller') ||
+    n.startsWith('app.')
+  ) {
+    return 'api-handler';
+  }
+  if (n.includes('validate') || n.includes('schema')) return 'validator';
+  if (n.includes('util') || n.includes('helper')) return 'utility';
+  if (keyword === 'class') return 'class-method';
+  if (n.match(/^[A-Z]/)) return 'component';
+  if (keyword === 'function') return 'function';
+  return 'unknown';
+}
+
+/**
+ * Calculate Jaccard similarity between two strings
+ * Splitting by non-alphanumeric to be more robust
+ */
+function calculateSimilarity(a: string, b: string): number {
+  if (a === b) return 1.0;
+
+  const tokensA = a.split(/[^a-zA-Z0-9]+/).filter((t) => t.length > 0);
+  const tokensB = b.split(/[^a-zA-Z0-9]+/).filter((t) => t.length > 0);
+
+  if (tokensA.length === 0 || tokensB.length === 0) return 0;
+
+  const setA = new Set(tokensA);
+  const setB = new Set(tokensB);
+
+  const intersection = new Set([...setA].filter((x) => setB.has(x)));
+  const union = new Set([...setA, ...setB]);
+
+  return intersection.size / union.size;
+}
+
+/**
+ * Detect duplicate patterns across files
  */
 export async function detectDuplicatePatterns(
-  files: FileContent[],
+  fileContents: FileContent[],
   options: DetectionOptions
 ): Promise<DuplicatePattern[]> {
-  const {
-    minSimilarity,
-    minLines,
-    batchSize = 100,
-    approx = true,
-    minSharedTokens = 8,
-    maxCandidatesPerBlock = 100,
-    streamResults = false,
-  } = options;
-  const duplicates: DuplicatePattern[] = [];
+  const { minSimilarity, minLines, streamResults } = options;
+  const allBlocks: CodeBlock[] = [];
 
-  const maxComparisons = approx ? Infinity : 500000;
-
-  const allBlocks: CodeBlock[] = files.flatMap((file) =>
-    extractCodeBlocks(file.content, minLines)
-      .filter(
-        (block) => block && block.content && block.content.trim().length > 0
-      )
-      .map((block) => ({
-        ...block,
-        file: file.file,
-        normalized: normalizeCode(block.content),
-        tokenCost: block.content ? estimateTokens(block.content) : 0,
-      }))
-  );
-
-  // Add Python patterns if any
-  const pythonFiles = files.filter((f) => f.file.endsWith('.py'));
-  if (pythonFiles.length > 0) {
-    const { extractPythonPatterns } =
-      await import('./extractors/python-extractor');
-    const pythonPatterns = await extractPythonPatterns(
-      pythonFiles.map((f) => f.file)
-    );
+  for (const { file, content } of fileContents) {
+    const blocks = extractBlocks(file, content);
     allBlocks.push(
-      ...pythonPatterns.map((p) => ({
-        content: p.code,
-        startLine: p.startLine,
-        endLine: p.endLine,
-        file: p.file,
-        normalized: normalizeCode(p.code),
-        patternType: p.type as PatternType,
-        tokenCost: p.code ? estimateTokens(p.code) : 0,
-        linesOfCode: p.endLine - p.startLine + 1,
-      }))
+      ...blocks.filter((b) => b.endLine - b.startLine + 1 >= minLines)
     );
   }
 
-  const blockTokens = allBlocks.map((b) => tokenize(b.normalized));
-  const engine = approx ? new ApproxEngine(allBlocks, blockTokens) : null;
-
-  let comparisonsProcessed = 0;
-  const startTime = Date.now();
+  const duplicates: DuplicatePattern[] = [];
 
   for (let i = 0; i < allBlocks.length; i++) {
-    if (maxComparisons && comparisonsProcessed >= maxComparisons) break;
+    for (let j = i + 1; j < allBlocks.length; j++) {
+      const b1 = allBlocks[i];
+      const b2 = allBlocks[j];
 
-    if (i % batchSize === 0 && i > 0) {
-      if (options.onProgress) {
-        options.onProgress(i, allBlocks.length, 'Analyzing patterns');
-      } else {
-        const elapsed = (Date.now() - startTime) / 1000;
-        console.log(
-          `   Processed ${i}/${allBlocks.length} blocks (${elapsed.toFixed(1)}s, ${duplicates.length} duplicates)`
-        );
-      }
-      await new Promise((r) => setImmediate((resolve) => r(resolve)));
-    }
+      if (b1.file === b2.file) continue;
 
-    const block1 = allBlocks[i];
-    const candidates = engine
-      ? engine.findCandidates(i, minSharedTokens, maxCandidatesPerBlock)
-      : allBlocks.slice(i + 1).map((_, idx) => ({ j: i + 1 + idx, shared: 0 }));
+      const norm1 = normalizeCode(b1.code);
+      const norm2 = normalizeCode(b2.code);
 
-    for (const { j } of candidates) {
-      if (!approx && comparisonsProcessed >= maxComparisons) break;
-      comparisonsProcessed++;
+      const sim = calculateSimilarity(norm1, norm2);
 
-      const block2 = allBlocks[j];
-      if (block1.file === block2.file) continue;
-
-      const sim = jaccardSimilarity(blockTokens[i], blockTokens[j]);
       if (sim >= minSimilarity) {
-        const severity = calculateSeverity(
-          block1.file,
-          block2.file,
-          block1.content,
+        const { severity, reason, suggestion, matchedRule } = calculateSeverity(
+          b1.file,
+          b2.file,
+          b1.code,
           sim,
-          block1.linesOfCode
+          b1.endLine - b1.startLine + 1
         );
 
         const dup: DuplicatePattern = {
-          file1: block1.file,
-          file2: block2.file,
-          line1: block1.startLine,
-          line2: block2.startLine,
-          endLine1: block1.endLine,
-          endLine2: block2.endLine,
+          file1: b1.file,
+          line1: b1.startLine,
+          endLine1: b1.endLine,
+          file2: b2.file,
+          line2: b2.startLine,
+          endLine2: b2.endLine,
+          code1: b1.code,
+          code2: b2.code,
           similarity: sim,
-          snippet: block1.content.substring(0, 200),
-          patternType: block1.patternType,
-          tokenCost: block1.tokenCost,
-          linesOfCode: block1.linesOfCode,
-          severity: severity.severity,
-          reason: severity.reason,
-          suggestion: severity.suggestion,
+          patternType: b1.patternType,
+          tokenCost: b1.tokens + b2.tokens,
+          severity: severity as Severity,
+          reason,
+          suggestion,
+          matchedRule,
         };
 
         duplicates.push(dup);
@@ -145,5 +205,5 @@ export async function detectDuplicatePatterns(
     }
   }
 
-  return duplicates;
+  return duplicates.sort((a, b) => b.similarity - a.similarity);
 }

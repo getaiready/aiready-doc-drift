@@ -1,11 +1,10 @@
-import { scanFiles, readFileContent } from '@aiready/core';
+import { scanFiles, readFileContent, Severity, IssueType } from '@aiready/core';
 import type { AnalysisResult, Issue, ScanOptions } from '@aiready/core';
 import {
   detectDuplicatePatterns,
   type PatternType,
   type DuplicatePattern,
 } from './detector';
-import type { Severity } from './context-rules';
 import {
   groupDuplicatesByFilePair,
   createRefactorClusters,
@@ -15,14 +14,8 @@ import {
 } from './grouping';
 import { calculatePatternScore } from './scoring';
 
-export type {
-  PatternType,
-  DuplicatePattern,
-  Severity,
-  DuplicateGroup,
-  RefactorCluster,
-};
-export { calculatePatternScore };
+export type { PatternType, DuplicatePattern, DuplicateGroup, RefactorCluster };
+export { calculatePatternScore, Severity };
 
 export interface PatternDetectOptions extends ScanOptions {
   minSimilarity?: number; // 0-1, default 0.40 (Jaccard similarity)
@@ -274,15 +267,15 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
 
     const issues: Issue[] = fileDuplicates.map((dup) => {
       const otherFile = dup.file1 === file ? dup.file2 : dup.file1;
-      const severity: Issue['severity'] =
+      const severity: Severity =
         dup.similarity > 0.95
-          ? 'critical'
+          ? Severity.Critical
           : dup.similarity > 0.9
-            ? 'major'
-            : 'minor';
+            ? Severity.Major
+            : Severity.Minor;
 
       return {
-        type: 'duplicate-pattern' as const,
+        type: IssueType.DuplicatePattern,
         severity,
         message: `${dup.patternType} pattern ${Math.round(dup.similarity * 100)}% similar to ${otherFile} (${dup.tokenCost} tokens wasted)`,
         location: {
@@ -297,13 +290,13 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     let filteredIssues = issues;
     if (severity !== 'all') {
       const severityMap = {
-        critical: ['critical'],
-        high: ['critical', 'major'],
-        medium: ['critical', 'major', 'minor'],
+        critical: [Severity.Critical],
+        high: [Severity.Critical, Severity.Major],
+        medium: [Severity.Critical, Severity.Major, Severity.Minor],
       };
       const allowedSeverities = severityMap[
         severity as keyof typeof severityMap
-      ] || ['critical', 'major', 'minor'];
+      ] || [Severity.Critical, Severity.Major, Severity.Minor];
       filteredIssues = issues.filter((issue) =>
         allowedSeverities.includes(issue.severity)
       );

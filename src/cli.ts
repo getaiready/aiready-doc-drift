@@ -7,11 +7,7 @@ import {
   detectDuplicatePatterns,
 } from './index';
 import type { PatternType, DuplicatePattern } from './detector';
-import {
-  filterBySeverity,
-  getSeverityLabel,
-  type Severity,
-} from './context-rules';
+import { filterBySeverity, getSeverityLabel } from './context-rules';
 import chalk from 'chalk';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -19,6 +15,7 @@ import {
   loadConfig,
   mergeConfigWithDefaults,
   resolveOutputPath,
+  Severity,
 } from '@aiready/core';
 
 const program = new Command();
@@ -118,7 +115,7 @@ program
       streamResults: true,
       include: undefined,
       exclude: undefined,
-      minSeverity: 'minor' as Severity,
+      minSeverity: Severity.Minor,
       excludeTestFixtures: false,
       excludeTemplates: false,
       includeTests: false,
@@ -167,14 +164,14 @@ program
         ? parseInt(options.maxResults)
         : mergedConfig.maxResults,
       groupByFilePair:
-        options.groupByFilePair !== false && mergedConfig.groupByFilePair,
+        options.groupBy_file_pair !== false && mergedConfig.groupByFilePair,
       createClusters:
-        options.createClusters !== false && mergedConfig.createClusters,
-      minClusterTokenCost: options.minClusterTokens
-        ? parseInt(options.minClusterTokens)
+        options.create_clusters !== false && mergedConfig.createClusters,
+      minClusterTokenCost: options.min_cluster_tokens
+        ? parseInt(options.min_cluster_tokens)
         : mergedConfig.minClusterTokenCost,
-      minClusterFiles: options.minClusterFiles
-        ? parseInt(options.minClusterFiles)
+      minClusterFiles: options.min_cluster_files
+        ? parseInt(options.min_cluster_files)
         : mergedConfig.minClusterFiles,
       showRawDuplicates:
         options.showRawDuplicates || mergedConfig.showRawDuplicates,
@@ -328,18 +325,11 @@ program
       );
       console.log(chalk.cyan(divider) + '\n');
 
-      // Sort by severity, then by token cost
-      const severityOrder: Record<Severity, number> = {
-        critical: 4,
-        major: 3,
-        minor: 2,
-        info: 1,
-      };
-
       const topGroups = groups
         .sort((a, b) => {
-          const severityDiff =
-            severityOrder[b.severity] - severityOrder[a.severity];
+          const bVal = getSeverityValue(b.severity);
+          const aVal = getSeverityValue(a.severity);
+          const severityDiff = bVal - aVal;
           if (severityDiff !== 0) return severityDiff;
           return b.totalTokenCost - a.totalTokenCost;
         })
@@ -434,18 +424,11 @@ program
       console.log(chalk.bold.white('  TOP DUPLICATE PATTERNS'));
       console.log(chalk.cyan(divider) + '\n');
 
-      // Sort by severity (critical first), then similarity
-      const severityOrder: Record<Severity, number> = {
-        critical: 4,
-        major: 3,
-        minor: 2,
-        info: 1,
-      };
-
       const topDuplicates = filteredDuplicates
         .sort((a, b) => {
-          const severityDiff =
-            severityOrder[b.severity] - severityOrder[a.severity];
+          const bVal = getSeverityValue(b.severity);
+          const aVal = getSeverityValue(a.severity);
+          const severityDiff = bVal - aVal;
           if (severityDiff !== 0) return severityDiff;
           return b.similarity - a.similarity;
         })
@@ -496,7 +479,7 @@ program
     );
 
     const criticalIssues = allIssues.filter(
-      (issue) => issue.severity === 'critical'
+      (issue) => getSeverityValue(issue.severity) === 4
     );
 
     if (criticalIssues.length > 0) {
@@ -666,14 +649,31 @@ function generateHTMLReport(summary: any, results: any[]): string {
 program.parse();
 
 /**
+ * Helper for severity numeric value
+ */
+function getSeverityValue(s: any): number {
+  if (s === Severity.Critical || s === 'critical') return 4;
+  if (s === Severity.Major || s === 'major') return 3;
+  if (s === Severity.Minor || s === 'minor') return 2;
+  if (s === Severity.Info || s === 'info') return 1;
+  return 0;
+}
+
+/**
  * Get colored severity badge for console output
  */
-function getSeverityBadge(severity: Severity): string {
-  const badges: Record<Severity, string> = {
-    critical: chalk.bgRed.white.bold(' CRITICAL '),
-    major: chalk.bgYellow.black.bold(' MAJOR '),
-    minor: chalk.bgBlue.white.bold(' MINOR '),
-    info: chalk.bgCyan.black(' INFO '),
-  };
-  return badges[severity] || badges.info;
+function getSeverityBadge(severity: Severity | string): string {
+  const val = getSeverityValue(severity);
+  switch (val) {
+    case 4:
+      return chalk.bgRed.white.bold(' CRITICAL ');
+    case 3:
+      return chalk.bgYellow.black.bold(' MAJOR ');
+    case 2:
+      return chalk.bgBlue.white.bold(' MINOR ');
+    case 1:
+      return chalk.bgCyan.black(' INFO ');
+    default:
+      return chalk.bgCyan.black(' INFO ');
+  }
 }
