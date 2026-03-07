@@ -344,10 +344,7 @@ export const ForceDirectedGraph = forwardRef<
             svg
               .transition()
               .duration(300)
-              .call(
-                d3.zoom<SVGSVGElement, unknown>().transform as any,
-                newTransform
-              );
+              .call((d3 as any).zoom().transform as any, newTransform);
             setTransform(newTransform);
           }
         },
@@ -384,10 +381,10 @@ export const ForceDirectedGraph = forwardRef<
       const svg = d3.select(svgRef.current);
       const g = d3.select(gRef.current);
 
-      const zoom = d3
-        .zoom<SVGSVGElement, unknown>()
+      const zoom = (d3 as any)
+        .zoom()
         .scaleExtent([0.1, 10])
-        .on('zoom', (event) => {
+        .on('zoom', (event: any) => {
           g.attr('transform', event.transform);
           transformRef.current = event.transform;
           setTransform(event.transform);
@@ -406,9 +403,7 @@ export const ForceDirectedGraph = forwardRef<
       if (!gRef.current) return;
       try {
         const g = d3.select(gRef.current);
-        g.selectAll<SVGGElement, any>('g.node').each(function (
-          this: SVGGElement
-        ) {
+        g.selectAll('g.node').each(function (this: any) {
           const datum = d3.select(this).datum() as any;
           if (!datum) return;
           d3.select(this).attr(
@@ -417,9 +412,7 @@ export const ForceDirectedGraph = forwardRef<
           );
         });
 
-        g.selectAll<SVGLineElement, any>('line').each(function (
-          this: SVGLineElement
-        ) {
+        g.selectAll('line').each(function (this: any) {
           const l = d3.select(this).datum() as any;
           if (!l) return;
           const s: any =
@@ -513,9 +506,9 @@ export const ForceDirectedGraph = forwardRef<
     useEffect(() => {
       if (!gRef.current || !enableDrag) return;
       const g = d3.select(gRef.current);
-      const dragBehavior = d3
-        .drag<SVGGElement, unknown>()
-        .on('start', function (event) {
+      const dragBehavior = (d3 as any)
+        .drag()
+        .on('start', function (this: any, event: any) {
           try {
             const target =
               (event.sourceEvent && (event.sourceEvent.target as Element)) ||
@@ -538,7 +531,7 @@ export const ForceDirectedGraph = forwardRef<
             void e;
           }
         })
-        .on('drag', function (event) {
+        .on('drag', function (this: any, event: any) {
           if (!dragActiveRef.current || !dragNodeRef.current) return;
           const svg = svgRef.current;
           if (!svg) return;
