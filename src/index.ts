@@ -99,6 +99,7 @@ export async function analyzeUnified(
   const result: UnifiedAnalysisResult = {
     summary: {
       totalIssues: 0,
+      totalFiles: 0,
       toolsRun: [],
       executionTime: 0,
     },
@@ -160,6 +161,13 @@ export async function analyzeUnified(
 
       result[provider.id] = output;
       result.summary.toolsRun.push(provider.id);
+
+      // Track total files analyzed across all tools
+      const toolFiles =
+        output.summary?.totalFiles || output.summary?.filesAnalyzed || 0;
+      if (toolFiles > result.summary.totalFiles) {
+        result.summary.totalFiles = toolFiles;
+      }
 
       const issueCount = output.results.reduce(
         (sum: number, file: any) => sum + (file.issues?.length || 0),
