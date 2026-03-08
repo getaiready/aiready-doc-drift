@@ -12,6 +12,7 @@ export interface AiSignalClarityOptions extends ScanOptions {
   checkUndocumentedExports?: boolean;
   checkImplicitSideEffects?: boolean;
   checkDeepCallbacks?: boolean;
+  checkOverloadedSymbols?: boolean;
   minSeverity?: string;
 }
 

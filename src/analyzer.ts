@@ -47,7 +47,7 @@ export async function analyzeAiSignalClarity(
       options.onProgress
     );
 
-    const result = scanFile(filePath, options);
+    const result = await scanFile(filePath, options);
     results.push(result);
     for (const key of Object.keys(aggregate) as Array<keyof typeof aggregate>) {
       aggregate[key] += result.signals[key] ?? 0;

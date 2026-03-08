@@ -1,16 +1,12 @@
 /**
- * AST-based scanner for AI signal clarity signals.
+ * Language-agnostic scanner for AI signal clarity signals.
  *
  * Detects code patterns that empirically cause AI models to generate
- * incorrect code — magic literals, boolean traps, ambiguous names,
- * undocumented exports, implicit side-effects, deep callbacks, and
- * overloaded symbols.
+ * incorrect code across all supported languages (TS, Python, Java, C#, Go).
  */
 
 import { readFileSync } from 'fs';
-import { parse } from '@typescript-eslint/typescript-estree';
-import type { TSESTree } from '@typescript-eslint/types';
-import { Severity, IssueType } from '@aiready/core';
+import { getParser, Severity, IssueType, Language } from '@aiready/core';
 import type {
   AiSignalClarityIssue,
   FileAiSignalClarityResult,
@@ -27,7 +23,7 @@ const AMBIGUOUS_NAME_PATTERNS = [
   /^[a-z]\d+$/, // x1, x2, n3
 ];
 
-const MAGIC_LITERAL_IGNORE = new Set([0, 1, -1, 2, 100, 1000, 1024]);
+const MAGIC_LITERAL_IGNORE = new Set([0, 1, -1, 2, 10, 100, 1000, 1024]);
 const MAGIC_STRING_IGNORE = new Set([
   '',
   ' ',
@@ -37,11 +33,10 @@ const MAGIC_STRING_IGNORE = new Set([
   'utf-8',
   'hex',
   'base64',
+  'true',
+  'false',
+  'null',
 ]);
-
-const VAGUE_FILE_PATTERNS =
-  /\/(utils|helpers?|misc|common|shared|index)\.(ts|js|tsx|jsx)$/;
-void VAGUE_FILE_PATTERNS;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -62,97 +57,14 @@ function isMagicString(value: string): boolean {
   return value.length <= 20 && !/[/.]/.test(value) && !/^\s+$/.test(value);
 }
 
-function getSignature(
-  node:
-    | TSESTree.FunctionDeclaration
-    | TSESTree.FunctionExpression
-    | TSESTree.ArrowFunctionExpression
-    | TSESTree.TSDeclareFunction
-): string {
-  return node.params.map((p) => JSON.stringify(p)).join(',');
-}
-
-function hasJSDoc(node: TSESTree.Node, code: string): boolean {
-  const start = node.range?.[0] ?? 0;
-  const preceding = code.slice(Math.max(0, start - 200), start);
-  return (
-    /\/\*\*[\s\S]*?\*\/\s*$/.test(preceding) ||
-    /\/\/[^\n]*\n\s*$/.test(preceding)
-  );
-}
-
-function isVoidWithSideEffect(
-  node:
-    | TSESTree.FunctionDeclaration
-    | TSESTree.FunctionExpression
-    | TSESTree.ArrowFunctionExpression
-): boolean {
-  // Heuristic: function returns nothing but contains assignments or calls that mutate external state
-  // We look for: no explicit return with a value, AND contains assignment to non-local vars
-  let hasReturn = false;
-  let hasMutation = false;
-
-  function walk(n: TSESTree.Node) {
-    if (n.type === 'ReturnStatement' && n.argument) {
-      hasReturn = true;
-    }
-    if (
-      n.type === 'AssignmentExpression' &&
-      n.left.type === 'MemberExpression'
-    ) {
-      hasMutation = true;
-    }
-    for (const key of Object.keys(n)) {
-      const child = (n as any)[key];
-      if (child && typeof child === 'object') {
-        if (Array.isArray(child)) {
-          child.forEach((c) => c && c.type && walk(c));
-        } else if (child.type) {
-          walk(child);
-        }
-      }
-    }
-  }
-
-  if (node.body && node.body.type === 'BlockStatement') {
-    node.body.body.forEach((s) => walk(s));
-  }
-
-  return !hasReturn && hasMutation;
-}
-
-function getCallbackDepth(node: TSESTree.Node, depth = 0): number {
-  let max = depth;
-  if (
-    node.type === 'ArrowFunctionExpression' ||
-    node.type === 'FunctionExpression'
-  ) {
-    depth++;
-    max = Math.max(max, depth);
-  }
-  for (const key of Object.keys(node)) {
-    const child = (node as any)[key];
-    if (child && typeof child === 'object') {
-      if (Array.isArray(child)) {
-        for (const c of child) {
-          if (c && c.type) max = Math.max(max, getCallbackDepth(c, depth));
-        }
-      } else if (child.type) {
-        max = Math.max(max, getCallbackDepth(child, depth));
-      }
-    }
-  }
-  return max;
-}
-
 // ---------------------------------------------------------------------------
 // Main scanner
 // ---------------------------------------------------------------------------
 
-export function scanFile(
+export async function scanFile(
   filePath: string,
   options: AiSignalClarityOptions = { rootDir: '.' }
-): FileAiSignalClarityResult {
+): Promise<FileAiSignalClarityResult> {
   let code: string;
   try {
     code = readFileSync(filePath, 'utf-8');
@@ -160,289 +72,247 @@ export function scanFile(
     return emptyResult(filePath);
   }
 
-  let ast: TSESTree.Program;
+  const parser = getParser(filePath);
+  if (!parser) return emptyResult(filePath);
+
   try {
-    ast = parse(code, {
-      jsx: filePath.endsWith('.tsx') || filePath.endsWith('.jsx'),
-      range: true,
-      loc: true,
-      comment: true,
-      tokens: false,
-    });
-  } catch {
-    return emptyResult(filePath);
-  }
+    await parser.initialize();
+    const result = parser.parse(code, filePath);
+    const ast = await parser.getAST(code, filePath);
 
-  const issues: AiSignalClarityIssue[] = [];
-  const signals = {
-    magicLiterals: 0,
-    booleanTraps: 0,
-    ambiguousNames: 0,
-    undocumentedExports: 0,
-    implicitSideEffects: 0,
-    deepCallbacks: 0,
-    overloadedSymbols: 0,
-    totalSymbols: 0,
-    totalExports: 0,
-  };
+    const issues: AiSignalClarityIssue[] = [];
+    const signals = {
+      magicLiterals: 0,
+      booleanTraps: 0,
+      ambiguousNames: 0,
+      undocumentedExports: 0,
+      implicitSideEffects: 0,
+      deepCallbacks: 0,
+      overloadedSymbols: 0,
+      totalSymbols: result.exports.length + result.imports.length,
+      totalExports: result.exports.length,
+    };
 
-  // Symbol tracking for overloading detection
-  const symbolSignatures = new Map<string, Set<string>>();
-  const exportedNames = new Set<string>();
+    // Symbol tracking for overloading detection
+    const symbolCounts = new Map<string, number>();
 
-  function reportIssue(
-    category: AiSignalClarityIssue['category'],
-    severity: Severity,
-    message: string,
-    node: TSESTree.Node,
-    suggestion?: string,
-    snippet?: string
-  ) {
-    let type: IssueType = IssueType.AiSignalClarity;
-    if (category === 'magic-literal') type = IssueType.MagicLiteral;
-    else if (category === 'boolean-trap') type = IssueType.BooleanTrap;
-    else if (category === 'ambiguous-name') type = IssueType.AmbiguousApi;
+    // 1. Check Metadata-based signals (Side Effects, Docs, Overloads)
+    for (const exp of result.exports) {
+      // Overload tracking
+      symbolCounts.set(exp.name, (symbolCounts.get(exp.name) || 0) + 1);
 
-    issues.push({
-      type,
-      category,
-      severity,
-      message,
-      location: {
-        file: filePath,
-        line: node.loc?.start.line ?? 0,
-        column: node.loc?.start.column,
-        endLine: node.loc?.end.line,
-      },
-      suggestion,
-      snippet,
-    });
-  }
-
-  function visitNode(node: TSESTree.Node) {
-    // --- Magic literals ---
-    if (options.checkMagicLiterals !== false) {
-      if (node.type === 'Literal') {
-        if (typeof node.value === 'number' && isMagicNumber(node.value)) {
-          signals.magicLiterals++;
-          reportIssue(
-            'magic-literal',
-            Severity.Minor,
-            `Magic number ${node.value} — AI will invent wrong semantics. Extract to a named constant.`,
-            node,
-            `const MEANINGFUL_NAME = ${node.value};`,
-            code.slice(node.range?.[0] ?? 0, node.range?.[1] ?? 0)
-          );
-        } else if (
-          typeof node.value === 'string' &&
-          isMagicString(node.value)
-        ) {
-          signals.magicLiterals++;
-          reportIssue(
-            'magic-literal',
-            Severity.Info,
-            `Magic string "${node.value}" — intent is ambiguous to AI. Consider a named constant.`,
-            node,
-            `const CONSTANT_NAME = '${node.value}';`
-          );
+      // Undocumented Exports
+      if (options.checkUndocumentedExports !== false) {
+        if (!exp.documentation || !exp.documentation.content) {
+          signals.undocumentedExports++;
+          issues.push({
+            type: IssueType.AiSignalClarity,
+            category: 'undocumented-export',
+            severity: Severity.Minor,
+            message: `Public export "${exp.name}" has no documentation — AI fabricates behavior from the name alone.`,
+            location: {
+              file: filePath,
+              line: exp.loc?.start.line || 1,
+              column: exp.loc?.start.column,
+            },
+            suggestion:
+              'Add a docstring or comment describing parameters, return value, and side effects.',
+          });
         }
       }
-    }
 
-    // --- Boolean traps ---
-    if (options.checkBooleanTraps !== false) {
-      if (
-        (node.type === 'CallExpression' || node.type === 'NewExpression') &&
-        node.arguments
-      ) {
-        const boolArgs = node.arguments.filter(
-          (a) =>
-            a.type === 'Literal' &&
-            typeof (a as TSESTree.Literal).value === 'boolean'
-        );
-        if (boolArgs.length >= 1) {
-          signals.booleanTraps++;
-          reportIssue(
-            'boolean-trap',
-            Severity.Major,
-            `Boolean trap: positional boolean argument(s) at call site. AI inverts intent ~30% of the time.`,
-            node,
-            'Replace boolean arg with a named options object: { enabled: true }'
-          );
-        }
-      }
-    }
-
-    // --- Ambiguous / non-descriptive names ---
-    if (options.checkAmbiguousNames !== false) {
-      if (
-        node.type === 'VariableDeclarator' &&
-        node.id &&
-        node.id.type === 'Identifier'
-      ) {
-        const name = node.id.name;
-        if (isAmbiguousName(name)) {
-          signals.ambiguousNames++;
-          if (signals.ambiguousNames <= 50) {
-            // cap issue count per file
-            reportIssue(
-              'ambiguous-name',
-              Severity.Info,
-              `Ambiguous identifier "${name}" — AI cannot infer intent and will guess incorrectly.`,
-              node.id,
-              'Use a domain-descriptive name instead.'
+      // Implicit Side Effects
+      if (options.checkImplicitSideEffects !== false) {
+        if (exp.hasSideEffects && !exp.isPure && exp.type === 'function') {
+          const lowerName = exp.name.toLowerCase();
+          const looksPure =
+            !/(set|update|save|delete|create|write|send|post|sync)/.test(
+              lowerName
             );
+
+          if (looksPure) {
+            signals.implicitSideEffects++;
+            issues.push({
+              type: IssueType.AiSignalClarity,
+              category: 'implicit-side-effect',
+              severity: Severity.Major,
+              message: `Function "${exp.name}" mutates external state but name doesn't reflect it — AI misses this contract.`,
+              location: {
+                file: filePath,
+                line: exp.loc?.start.line || 1,
+              },
+              suggestion:
+                'Make side-effects explicit in function name (e.g., updateX) or return a result.',
+            });
           }
         }
       }
-      if (
-        node.type === 'FunctionDeclaration' &&
-        node.id &&
-        node.id.type === 'Identifier'
-      ) {
-        // also check function names and params
-        if (isAmbiguousName(node.id.name)) signals.ambiguousNames++;
-        node.params.forEach((p) => {
-          if (p.type === 'Identifier' && isAmbiguousName(p.name))
-            signals.ambiguousNames++;
+
+      // Ambiguous Names for Exports
+      if (options.checkAmbiguousNames !== false && isAmbiguousName(exp.name)) {
+        signals.ambiguousNames++;
+        issues.push({
+          type: IssueType.AmbiguousApi,
+          category: 'ambiguous-name',
+          severity: Severity.Info,
+          message: `Ambiguous public export "${exp.name}" — AI cannot infer intent and will guess incorrectly.`,
+          location: {
+            file: filePath,
+            line: exp.loc?.start.line || 1,
+          },
+          suggestion: 'Use a domain-descriptive name instead.',
         });
       }
-
-      // Count all function/variable declarations as symbols
-      if (
-        node.type === 'FunctionDeclaration' ||
-        node.type === 'FunctionExpression' ||
-        node.type === 'ArrowFunctionExpression' ||
-        node.type === 'VariableDeclarator'
-      ) {
-        signals.totalSymbols++;
-      }
     }
 
-    // --- Overloaded symbols (TSDeclareFunction) ---
-    if (node.type === 'TSDeclareFunction' && node.id) {
-      const name = node.id.name;
-      const sig = getSignature(node as any);
-      if (!symbolSignatures.has(name)) symbolSignatures.set(name, new Set());
-      symbolSignatures.get(name)!.add(sig);
-    }
-    if (node.type === 'FunctionDeclaration' && node.id) {
-      const name = node.id.name;
-      const sig = getSignature(node);
-      if (!symbolSignatures.has(name)) symbolSignatures.set(name, new Set());
-      symbolSignatures.get(name)!.add(sig);
-    }
-
-    // --- Implicit side effects ---
-    if (options.checkImplicitSideEffects !== false) {
-      if (
-        node.type === 'ArrowFunctionExpression' ||
-        node.type === 'FunctionExpression' ||
-        node.type === 'FunctionDeclaration'
-      ) {
-        if (isVoidWithSideEffect(node as any)) {
-          signals.implicitSideEffects++;
-          reportIssue(
-            'implicit-side-effect',
-            Severity.Major,
-            'Function mutates external state without returning a value — AI misses this contract.',
-            node,
-            'Make side-effects explicit in function name (e.g., updateX) or return a result.'
-          );
+    // Report Overloads
+    if (options.checkOverloadedSymbols !== false) {
+      for (const [name, count] of symbolCounts.entries()) {
+        if (count > 1 && name !== 'default' && name !== 'anonymous') {
+          signals.overloadedSymbols++;
+          issues.push({
+            type: IssueType.AiSignalClarity,
+            category: 'overloaded-symbol',
+            severity: Severity.Critical,
+            message: `Symbol "${name}" has ${count} overloaded signatures — AI often picks the wrong one or gets confused by conflicting contracts.`,
+            location: {
+              file: filePath,
+              line: 1,
+            },
+            suggestion: `Rename overloads to unique, descriptive names if possible.`,
+          });
         }
       }
     }
 
-    // --- Exports (for undocumented export detection) ---
-    if (
-      node.type === 'ExportNamedDeclaration' ||
-      node.type === 'ExportDefaultDeclaration'
-    ) {
-      signals.totalExports++;
-      const decl = (node as any).declaration;
-      if (decl) {
-        const name =
-          decl.id?.name ?? decl.declarations?.[0]?.id?.name ?? 'anonymous';
-        exportedNames.add(name);
+    // 2. Check AST-based signals (Structural: Magic Literals, Boolean Traps, Callbacks)
+    if (ast) {
+      let callbackDepth = 0;
+      let maxCallbackDepth = 0;
 
-        // Check JSDoc presence
-        if (
-          options.checkUndocumentedExports !== false &&
-          !hasJSDoc(node, code)
-        ) {
-          signals.undocumentedExports++;
-          reportIssue(
-            'undocumented-export',
-            Severity.Minor,
-            `Public export "${name}" has no JSDoc — AI fabricates behavior from the name alone.`,
-            node,
-            'Add a JSDoc comment describing parameters, return value, and side effects.'
-          );
-        }
-      }
-    }
-
-    // Recurse
-    for (const key of Object.keys(node)) {
-      if (key === 'parent') continue;
-      const child = (node as any)[key];
-      if (child && typeof child === 'object') {
-        if (Array.isArray(child)) {
-          for (const c of child) {
-            if (c && typeof c.type === 'string') visitNode(c);
+      const visitNode = (node: any) => {
+        // --- Magic Literals ---
+        if (options.checkMagicLiterals !== false) {
+          if (node.type === 'number') {
+            const val = parseFloat(node.text);
+            if (!isNaN(val) && isMagicNumber(val)) {
+              signals.magicLiterals++;
+              issues.push({
+                type: IssueType.MagicLiteral,
+                category: 'magic-literal',
+                severity: Severity.Minor,
+                message: `Magic number ${node.text} — AI will invent wrong semantics. Extract to a named constant.`,
+                location: {
+                  file: filePath,
+                  line: node.startPosition.row + 1,
+                  column: node.startPosition.column,
+                },
+                suggestion: `const MEANINGFUL_NAME = ${node.text};`,
+              });
+            }
+          } else if (node.type === 'string' || node.type === 'string_literal') {
+            const val = node.text.replace(/['"]/g, '');
+            if (isMagicString(val)) {
+              signals.magicLiterals++;
+              issues.push({
+                type: IssueType.MagicLiteral,
+                category: 'magic-literal',
+                severity: Severity.Info,
+                message: `Magic string "${val}" — intent is ambiguous to AI. Consider a named constant.`,
+                location: {
+                  file: filePath,
+                  line: node.startPosition.row + 1,
+                },
+              });
+            }
           }
-        } else if (typeof child.type === 'string') {
-          visitNode(child);
         }
+
+        // --- Boolean Traps ---
+        if (options.checkBooleanTraps !== false) {
+          if (node.type === 'argument_list') {
+            const hasBool = node.namedChildren?.some(
+              (c: any) =>
+                c.type === 'true' ||
+                c.type === 'false' ||
+                (c.type === 'boolean' &&
+                  (c.text === 'true' || c.text === 'false'))
+            );
+            if (hasBool) {
+              signals.booleanTraps++;
+              issues.push({
+                type: IssueType.BooleanTrap,
+                category: 'boolean-trap',
+                severity: Severity.Major,
+                message: `Boolean trap: positional boolean argument at call site. AI inverts intent ~30% of the time.`,
+                location: {
+                  file: filePath,
+                  line: node.startPosition.row + 1,
+                },
+                suggestion:
+                  'Replace boolean arg with a named options object or separate functions.',
+              });
+            }
+          }
+        }
+
+        // --- Callback Depth ---
+        const type = node.type.toLowerCase();
+        const isFunction =
+          type.includes('function') ||
+          type.includes('arrow') ||
+          type.includes('lambda') ||
+          type === 'method_declaration';
+
+        if (isFunction) {
+          callbackDepth++;
+          maxCallbackDepth = Math.max(maxCallbackDepth, callbackDepth);
+        }
+
+        if (node.namedChildren) {
+          for (const child of node.namedChildren) {
+            visitNode(child);
+          }
+        }
+
+        if (isFunction) {
+          callbackDepth--;
+        }
+      };
+
+      visitNode(ast.rootNode);
+
+      if (options.checkDeepCallbacks !== false && maxCallbackDepth >= 3) {
+        signals.deepCallbacks = maxCallbackDepth - 2;
+        issues.push({
+          type: IssueType.AiSignalClarity,
+          category: 'deep-callback',
+          severity: Severity.Major,
+          message: `Deeply nested logic (depth ${maxCallbackDepth}) — AI loses control flow context beyond 3 levels.`,
+          location: {
+            file: filePath,
+            line: 1,
+          },
+          suggestion:
+            'Extract nested logic into named functions or flatten the structure.',
+        });
       }
     }
-  }
 
-  // Walk the AST
-  for (const node of ast.body) {
-    visitNode(node);
+    return {
+      filePath,
+      issues,
+      signals,
+      fileName: filePath,
+      metrics: {
+        totalSymbols: signals.totalSymbols,
+        totalExports: signals.totalExports,
+      },
+    };
+  } catch (error) {
+    console.error(`AI Signal Clarity: Failed to scan ${filePath}: ${error}`);
+    return emptyResult(filePath);
   }
-
-  // --- Deep callback nesting (run once on whole AST) ---
-  if (options.checkDeepCallbacks !== false) {
-    const maxDepth = getCallbackDepth(ast);
-    if (maxDepth >= 3) {
-      signals.deepCallbacks = maxDepth - 2;
-      reportIssue(
-        'deep-callback',
-        Severity.Major,
-        `Callback nesting depth ${maxDepth} — AI loses control flow context beyond 3 levels.`,
-        ast.body[0] ?? ast,
-        'Extract nested callbacks into named async functions or use async/await.'
-      );
-    }
-  }
-
-  // --- Overloaded symbol detection (post-walk) ---
-  for (const [name, sigs] of symbolSignatures.entries()) {
-    if (sigs.size > 1) {
-      signals.overloadedSymbols++;
-      reportIssue(
-        'overloaded-symbol',
-        Severity.Critical,
-        `Symbol "${name}" has ${sigs.size} overloaded signatures — AI picks the wrong one.`,
-        ast.body[0] ?? ast,
-        `Rename each overload to a unique, descriptive name.`
-      );
-    }
-  }
-
-  return {
-    filePath,
-    issues,
-    signals,
-    fileName: filePath, // Add fileName for AnalysisResult compatibility
-    metrics: {
-      // Add metrics for AnalysisResult compatibility
-      totalSymbols: signals.totalSymbols,
-      totalExports: signals.totalExports,
-    },
-  };
 }
 
 function emptyResult(filePath: string): FileAiSignalClarityResult {

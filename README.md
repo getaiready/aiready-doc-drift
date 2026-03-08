@@ -9,6 +9,12 @@
 
 AI models often generate incorrect code when they encounter ambiguous signals in the codebase. The **AI Signal Clarity** analyzer (formerly `hallucination-risk`) scans for high-entropy patterns that undermine AI reasoning.
 
+### Language Support
+
+- **Full Support:** TypeScript, JavaScript, Python, Java, Go, C#
+- **Capabilities:** Boolean trap detection, naming entropy, ambiguous API signals.
+  toxicology
+
 ## 🏛️ Architecture
 
 ```
