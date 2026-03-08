@@ -24,7 +24,7 @@ interface RepoHeaderProps {
 
 export function RepoHeader({ repo, analysis, onViewConfig }: RepoHeaderProps) {
   return (
-    <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <section className="w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="space-y-4">
         <div className="flex items-center gap-6">
           <Link

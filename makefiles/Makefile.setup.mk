@@ -55,7 +55,17 @@ clean: ## Clean all build artifacts and node_modules
 	@find packages -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
 	@find packages -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
 	@rm -rf node_modules
+	@rm -rf .turbo/cache
 	@$(call log_success,Clean complete)
+
+clean-cache: ## Clean .turbo/cache files older than 3 days
+	@$(call log_info,Cleaning .turbo/cache files older than 3 days...)
+	@if [ -d .turbo/cache ]; then \
+		find .turbo/cache -type f -mtime +3 -delete; \
+		$(call log_success,.turbo/cache cleaned (files > 3 days old removed)); \
+	else \
+		$(call log_info,.turbo/cache does not exist. Skipping.); \
+	fi
 
 
 clear-port: ## Clear common dev port

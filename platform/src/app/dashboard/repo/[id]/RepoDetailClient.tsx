@@ -225,13 +225,11 @@ function RepoDetailContent({ repo, user, teams, overallScore }: Props) {
       activePage="repo"
     >
       <div className="p-4 sm:p-6 lg:p-8 space-y-8 text-white">
-        <div className="flex items-start justify-between">
-          <RepoHeader
-            repo={repo}
-            analysis={analysis}
-            onViewConfig={() => setShowConfig(true)}
-          />
-        </div>
+        <RepoHeader
+          repo={repo}
+          analysis={analysis}
+          onViewConfig={() => setShowConfig(true)}
+        />
 
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-4">

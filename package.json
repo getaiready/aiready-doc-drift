@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
+    "prebuild": "make clean-cache",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
