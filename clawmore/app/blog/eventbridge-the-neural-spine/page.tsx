@@ -17,8 +17,8 @@ import {
   GitBranch,
   Layers,
 } from 'lucide-react';
-import BlogHero from '../../components/BlogHero';
-import BlogCard from '../../components/BlogCard';
+import BlogHero from '../../../components/BlogHero';
+import BlogCard from '../../../components/BlogCard';
 import Modal from '../../../components/Modal';
 import LeadForm from '../../../components/LeadForm';
 import SystemFlow from '../../../components/SystemFlow';

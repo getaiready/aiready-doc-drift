@@ -11,10 +11,10 @@ import {
   Code,
   ShieldCheck,
 } from 'lucide-react';
-import BlogHero from '../../components/BlogHero';
-import BlogCard from '../../components/BlogCard';
-import Modal from '../../components/Modal';
-import LeadForm from '../../components/LeadForm';
+import BlogHero from '../components/BlogHero';
+import BlogCard from '../components/BlogCard';
+import Modal from '../components/Modal';
+import LeadForm from '../components/LeadForm';
 
 const BLOG_POSTS = [
   {
