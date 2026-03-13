@@ -8,6 +8,7 @@ import ReactFlow, {
   Node,
   MarkerType,
   ConnectionLineType,
+  BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -81,7 +82,12 @@ export default function SystemFlow({
         zoomOnScroll={false}
       >
         {/* Slightly darker background dots for better node contrast */}
-        <Background color="#333" gap={20} variant="dots" size={1} />
+        <Background
+          color="#333"
+          gap={20}
+          variant={BackgroundVariant.Dots}
+          size={1}
+        />
         <Controls
           showInteractive={false}
           className="opacity-20 hover:opacity-100 transition-opacity"
