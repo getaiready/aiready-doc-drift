@@ -7,6 +7,14 @@ export default function BlogHero() {
   return (
     <section className="relative py-20 overflow-hidden border-b border-white/5">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(188,0,255,0.05)_0%,_transparent_70%)] opacity-50" />
+      <div className="absolute inset-0 -z-20 opacity-20">
+        <img
+          src="/blog/blog-hero.png"
+          alt="Hero Background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
 
       <div className="container mx-auto px-4 relative">
         <div className="max-w-3xl mx-auto text-center">

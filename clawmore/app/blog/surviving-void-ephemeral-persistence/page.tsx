@@ -100,6 +100,8 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
+    image:
+      'https://clawmore.getaiready.dev/blog/surviving-void-ephemeral-persistence.png',
     url: 'https://clawmore.getaiready.dev/blog/surviving-void-ephemeral-persistence',
   };
 
@@ -139,6 +141,15 @@ export default function BlogPost() {
               runtime is destroyed every 15 minutes? Exploring the S3 + DynamoDB
               state backbone.
             </p>
+
+            <div className="mt-12 relative aspect-[21/9] w-full overflow-hidden border border-white/10 rounded-sm group">
+              <img
+                src="/blog/surviving-void-ephemeral-persistence.png"
+                alt="Surviving the Void: Cross-Lifecycle Memory"
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </div>
           </div>
         </div>
       </header>

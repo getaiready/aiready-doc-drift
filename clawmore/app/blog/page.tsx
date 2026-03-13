@@ -29,6 +29,7 @@ const BLOG_POSTS = [
     readTime: '06 MIN',
     hash: '5086da9',
     category: 'CORE_ENGINE',
+    image: '/blog/death-of-the-transient-agent.png',
   },
   {
     slug: 'eventbridge-the-neural-spine',
@@ -39,6 +40,7 @@ const BLOG_POSTS = [
     readTime: '08 MIN',
     hash: '915c10e',
     category: 'NETWORK_SPINE',
+    image: '/blog/eventbridge-the-neural-spine.png',
   },
   {
     slug: 'the-reflector-self-critique',
@@ -49,6 +51,7 @@ const BLOG_POSTS = [
     readTime: '05 MIN',
     hash: 'bd95a79',
     category: 'SAFETY_GUARDS',
+    image: '/blog/the-reflector-self-critique.png',
   },
   {
     slug: 'sst-ion-coder-loop',
@@ -59,6 +62,7 @@ const BLOG_POSTS = [
     readTime: '07 MIN',
     hash: 'a2eb83b',
     category: 'JIT_INFRASTRUCTURE',
+    image: '/blog/sst-ion-coder-loop.png',
   },
   {
     slug: 'ironclad-autonomy-safety-vpc',
@@ -69,6 +73,7 @@ const BLOG_POSTS = [
     readTime: '06 MIN',
     hash: 'bd95a79',
     category: 'SAFETY_GUARDS',
+    image: '/blog/ironclad-autonomy-safety-vpc.png',
   },
   {
     slug: 'one-dollar-ai-agent',
@@ -79,6 +84,7 @@ const BLOG_POSTS = [
     readTime: '06 MIN',
     hash: '1dollarai',
     category: 'MINIMALIST_ARCHITECT',
+    image: '/blog/one-dollar-ai-agent.png',
   },
   {
     slug: 'bridge-pattern-ephemeral-persistent',
@@ -89,6 +95,7 @@ const BLOG_POSTS = [
     readTime: '07 MIN',
     hash: 'bridge-proto',
     category: 'PROTOCOL_BRIDGE',
+    image: '/blog/bridge-pattern-ephemeral-persistent.png',
   },
   {
     slug: 'omni-channel-ai-gateway',
@@ -99,6 +106,7 @@ const BLOG_POSTS = [
     readTime: '06 MIN',
     hash: 'omni-gate',
     category: 'OMNI_CHANNEL',
+    image: '/blog/omni-channel-ai-gateway.png',
   },
   {
     slug: 'surviving-void-ephemeral-persistence',
@@ -109,6 +117,7 @@ const BLOG_POSTS = [
     readTime: '07 MIN',
     hash: 'state-void',
     category: 'EPHEMERAL_PERSISTENCE',
+    image: '/blog/surviving-void-ephemeral-persistence.png',
   },
   {
     slug: 'cdk-monorepo-mastery',
@@ -119,6 +128,7 @@ const BLOG_POSTS = [
     readTime: '06 MIN',
     hash: 'cdk-master',
     category: 'INFRA_AS_CODE',
+    image: '/blog/cdk-monorepo-mastery.png',
   },
 ];
 
@@ -145,6 +155,7 @@ export default function BlogIndex() {
       headline: post.title,
       description: post.excerpt,
       datePublished: post.date,
+      image: `https://clawmore.getaiready.dev${post.image}`,
       url: `https://clawmore.getaiready.dev/blog/${post.slug}`,
     })),
   };

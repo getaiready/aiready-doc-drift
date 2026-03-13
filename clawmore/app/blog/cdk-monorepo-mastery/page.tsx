@@ -102,7 +102,7 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image: 'https://clawmore.getaiready.dev/hero.png',
+    image: 'https://clawmore.getaiready.dev/blog/cdk-monorepo-mastery.png',
   };
 
   return (
@@ -140,6 +140,15 @@ export default function BlogPost() {
               blueprint. How we use AWS CDK and npm workspaces to manage the
               serverlessclaw monorepo.
             </p>
+
+            <div className="mt-12 relative aspect-[21/9] w-full overflow-hidden border border-white/10 rounded-sm group">
+              <img
+                src="/blog/cdk-monorepo-mastery.png"
+                alt="Infrastructure as Code: CDK Monorepo Mastery"
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </div>
           </div>
         </div>
       </header>
@@ -258,6 +267,34 @@ export class ClawSpineStack extends cdk.Stack {
                     missing is your first mutation.
                   </p>
                 </section>
+              </div>
+
+              {/* Series Navigation */}
+              <div className="mt-24 pt-12 border-t border-white/5">
+                <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.4em] mb-8">
+                  Restart_Evolutionary_Cycle
+                </div>
+                <Link
+                  href="/blog/death-of-the-transient-agent"
+                  className="block group"
+                >
+                  <div className="glass-card p-8 flex items-center justify-between hover:border-cyber-purple/30 transition-all bg-white/[0.01]">
+                    <div className="flex items-center gap-6">
+                      <div className="w-12 h-12 rounded-sm bg-cyber-purple/10 flex items-center justify-center text-cyber-purple border border-cyber-purple/20">
+                        <ArrowLeft className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-mono text-cyber-purple uppercase tracking-widest mb-1">
+                          PART 01 // CORE_CONCEPTS
+                        </div>
+                        <div className="text-2xl font-black italic group-hover:text-white transition-colors">
+                          The Death of the Transient Agent
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-6 h-6 text-zinc-700 group-hover:text-cyber-purple group-hover:translate-x-1 transition-all" />
+                  </div>
+                </Link>
               </div>
 
               {/* Series Completion */}
