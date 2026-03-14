@@ -1,5 +1,5 @@
 import React from 'react';
-import type { GraphLink, GraphNode } from './ForceDirectedGraph';
+import type { GraphLink, GraphNode } from './types';
 
 export interface LinkItemProps {
   link: GraphLink;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateFragmentation } from '../analyzer';
+import { calculateFragmentation } from '../index';
 
 describe('calculateFragmentation (log scale option)', () => {
   it('returns 0 for single file regardless of option', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ContextAnalyzerProvider } from '../provider';
-import * as analyzer from '../analyzer';
+import * as analyzer from '../index';
 import * as summary from '../summary';
 
 vi.mock('../analyzer', async () => {

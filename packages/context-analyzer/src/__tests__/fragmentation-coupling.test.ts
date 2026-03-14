@@ -3,7 +3,7 @@ import {
   buildDependencyGraph,
   detectModuleClusters,
   calculateFragmentation,
-} from '../analyzer';
+} from '../index';
 
 describe('fragmentation coupling discount', () => {
   it('does not apply discount when files have no shared imports', () => {

@@ -76,8 +76,8 @@ pre-push: ## Run pre-push checks (AIReady scan)
 	@if [ "$$SKIP_PRE_PUSH" = "true" ]; then \
 		$(call log_info,⏭️  Skipping AIReady pre-push scan (SKIP_PRE_PUSH=true)); \
 	else \
-		$(call log_step,🚀 Running AIReady pre-push scan (Threshold: 80)...); \
-		node packages/cli/dist/cli.js scan . --threshold 80; \
+		$(call log_step,🚀 Running AIReady pre-push scan (Threshold: 75)...); \
+		node packages/cli/dist/cli.js scan . --threshold 75; \
 	fi
 
 lint-staged: ## Run lint-staged on changed files

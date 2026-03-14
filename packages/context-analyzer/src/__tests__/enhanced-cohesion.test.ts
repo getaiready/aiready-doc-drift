@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateCohesion } from '../analyzer';
+import { calculateCohesion } from '../index';
 import type { ExportInfo } from '../types';
 
 describe('Enhanced Cohesion Calculation', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildDependencyGraph } from '../analyzer';
+import { buildDependencyGraph } from '../index';
 
 describe('Auto-detection from folder structure', () => {
   it('should auto-detect domain keywords from folder paths', () => {

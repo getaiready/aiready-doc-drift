@@ -1,5 +1,5 @@
 import React from 'react';
-import type { GraphNode } from './ForceDirectedGraph';
+import type { GraphNode } from './types';
 
 export interface NodeItemProps {
   node: GraphNode;

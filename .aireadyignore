@@ -18,14 +18,6 @@ platform/**
 action-marketplace/**
 # Exclude vscode extension - separate distribution channel
 vscode-extension/**
-# Exclude generated visualizer data file (58MB, machine-generated)
-packages/visualizer/web/report-data.json
-# Exclude large language-parser implementations (machine-ported from tree-sitter grammars)
-packages/core/src/parsers/go-parser.ts
-packages/core/src/parsers/csharp-parser.ts
-packages/core/src/parsers/java-parser.ts
-packages/core/src/parsers/typescript-parser.ts
-packages/core/src/parsers/python-parser.ts
 # Exclude HTML coverage reports
 packages/cli/coverage/**
 packages/context-analyzer/coverage/**

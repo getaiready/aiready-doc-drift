@@ -7,7 +7,7 @@ import {
   detectCircularDependencies,
   calculateCohesion,
   calculateFragmentation,
-} from '../analyzer';
+} from '../index';
 
 describe('buildDependencyGraph', () => {
   it('should build a basic dependency graph', () => {

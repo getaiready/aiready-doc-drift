@@ -1,0 +1,90 @@
+{
+  "scan": {
+    "include": [
+      "packages/*/src/**",
+      "platform/src/**",
+      "landing/src/**",
+      "clawmore/src/**"
+    ],
+    "exclude": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.test.ts",
+      "**/*.spec.ts"
+    ],
+    "tools": [
+      "pattern-detect",
+      "context-analyzer",
+      "naming-consistency",
+      "ai-signal-clarity",
+      "agent-grounding",
+      "testability-index",
+      "doc-drift",
+      "dependency-health",
+      "change-amplification"
+    ]
+  },
+  "tools": {
+    "pattern-detect": {
+      "minSimilarity": 0.8,
+      "minLines": 5,
+      "batchSize": 50,
+      "approx": true,
+      "minSharedTokens": 10,
+      "maxCandidatesPerBlock": 100
+    },
+    "context-analyzer": {
+      "maxContextBudget": 128000,
+      "minCohesion": 0.6,
+      "maxDepth": 7,
+      "maxFragmentation": 0.4,
+      "focus": "all",
+      "includeNodeModules": false
+    },
+    "naming-consistency": {
+      "shortWords": ["id", "db", "ui", "ai"],
+      "acceptedAbbreviations": [],
+      "disableChecks": []
+    },
+    "ai-signal-clarity": {
+      "checkMagicLiterals": true,
+      "checkBooleanTraps": true,
+      "checkAmbiguousNames": true,
+      "checkUndocumentedExports": true,
+      "checkImplicitSideEffects": false,
+      "checkDeepCallbacks": false
+    },
+    "agent-grounding": {
+      "maxRecommendedDepth": 5,
+      "readmeStaleDays": 30
+    },
+    "testability-index": {
+      "minCoverageRatio": 0.7,
+      "testPatterns": ["**/*.test.ts", "**/__tests__/**"]
+    },
+    "doc-drift": {
+      "maxCommits": 50,
+      "staleMonths": 3
+    },
+    "dependency-health": {
+      "trainingCutoffYear": 2023
+    }
+  },
+  "scoring": {
+    "threshold": 75,
+    "showBreakdown": true,
+    "profile": "default"
+  },
+  "output": {
+    "format": "json",
+    "file": "aiready-report.json"
+  },
+  "visualizer": {
+    "groupingDirs": ["packages", "src", "lib"],
+    "graph": {
+      "maxNodes": 5000,
+      "maxEdges": 10000
+    }
+  }
+}

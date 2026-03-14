@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateStructuralCohesionFromCoUsage } from '../analyzer';
+import { calculateStructuralCohesionFromCoUsage } from '../index';
 
 describe('calculateStructuralCohesionFromCoUsage', () => {
   it('returns 1 when no co-usage data present', () => {

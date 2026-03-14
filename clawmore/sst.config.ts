@@ -68,7 +68,7 @@ export default $config({
             }
           : undefined,
       environment: {
-        NEXT_PUBLIC_APP_URL: isProd ? `https://${domainName}` : undefined,
+        NEXT_PUBLIC_APP_URL: `https://${domainName}`,
         LEAD_API_URL: api.url,
       },
     });

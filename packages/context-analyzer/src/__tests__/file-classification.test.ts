@@ -4,7 +4,7 @@ import {
   adjustFragmentationForClassification,
   adjustCohesionForClassification,
   getClassificationRecommendations,
-} from '../analyzer';
+} from '../index';
 import type { DependencyNode } from '../types';
 
 describe('file classification', () => {

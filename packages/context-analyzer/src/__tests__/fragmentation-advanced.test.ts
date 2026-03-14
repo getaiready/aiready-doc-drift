@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculatePathEntropy, calculateDirectoryDistance } from '../analyzer';
+import { calculatePathEntropy, calculateDirectoryDistance } from '../index';
 
 describe('advanced fragmentation heuristics', () => {
   it('path entropy is low when most files are in one directory', () => {
