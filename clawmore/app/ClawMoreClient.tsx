@@ -25,35 +25,8 @@ import JsonLd from '../components/JsonLd';
 
 interface ClawMoreClientProps {
   apiUrl: string;
+  dict: any;
 }
-
-const FAQ_ITEMS = [
-  {
-    question: 'What exactly is ClawMore?',
-    answer:
-      'ClawMore is an autonomous agentic system built for AWS. Unlike standard AI assistants that just provide code snippets, ClawMore interprets your intent, designs infrastructure mutations, and persists them directly to your source control using SST Ion.',
-  },
-  {
-    question: 'How does the Autonomous Evolution loop work?',
-    answer:
-      'It uses a "Reflector" agent that monitors system logs and performance. When it detects a gap or opportunity for optimization, it triggers a Self-Correction Request (SCR). An "Architect" then designs a patch, and a "Coder" executes the mutation via Git.',
-  },
-  {
-    question: 'Is it safe to give ClawMore access to my AWS account?',
-    answer:
-      'Yes. ClawMore uses "Bring Your Own Cloud" (BYOC) architecture. It runs within your own VPC with strict IAM boundaries and Recursion Guards that prevent runaway mutations. You maintain full control over approval gates for high-risk changes.',
-  },
-  {
-    question: 'What is the "Evolution Tax"?',
-    answer:
-      'We align our success with yours. For the managed version, you pay a flat monthly fee plus $1 per successful mutation—an autonomous commit that passes all your CI/CD gates. If your system is stagnant, you pay zero for mutations.',
-  },
-  {
-    question: 'How do I get started for free?',
-    answer:
-      'The Community Node is 100% open source and free forever. You can fork the repository, deploy it to your own AWS account, and start using the core autonomous engine today.',
-  },
-];
 
 const CLAW_MORE_JSON_LD = {
   '@context': 'https://schema.org',
@@ -72,8 +45,7 @@ const CLAW_MORE_JSON_LD = {
     name: 'Perpetual Evolution',
   },
 };
-
-export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
+export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'beta' | 'waitlist'>('beta');
 
@@ -84,10 +56,45 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
 
   const closeModal = () => setIsModalOpen(false);
 
+  // Fallback to static strings if dict is not yet updated for everything
+  const FAQ_ITEMS = [
+    {
+      question: dict.faq?.q1 || 'What exactly is ClawMore?',
+      answer:
+        dict.faq?.a1 ||
+        'ClawMore is an autonomous agentic system built for AWS. Unlike standard AI assistants that just provide code snippets, ClawMore interprets your intent, designs infrastructure mutations, and persists them directly to your source control using SST Ion.',
+    },
+    {
+      question: dict.faq?.q2 || 'How does the Autonomous Evolution loop work?',
+      answer:
+        dict.faq?.a2 ||
+        'It uses a "Reflector" agent that monitors system logs and performance. When it detects a gap or opportunity for optimization, it triggers a Self-Correction Request (SCR). An "Architect" then designs a patch, and a "Coder" executes the mutation via Git.',
+    },
+    {
+      question:
+        dict.faq?.q3 || 'Is it safe to give ClawMore access to my AWS account?',
+      answer:
+        dict.faq?.a3 ||
+        'Yes. ClawMore uses "Bring Your Own Cloud" (BYOC) architecture. It runs within your own VPC with strict IAM boundaries and Recursion Guards that prevent runaway mutations. You maintain full control over approval gates for high-risk changes.',
+    },
+    {
+      question: dict.faq?.q4 || 'What is the "Evolution Tax"?',
+      answer:
+        dict.faq?.a4 ||
+        'We align our success with yours. For the managed version, you pay a flat monthly fee plus $1 per successful mutation—an autonomous commit that passes all your CI/CD gates. If your system is stagnant, you pay zero for mutations.',
+    },
+    {
+      question: dict.faq?.q5 || 'How do I get started for free?',
+      answer:
+        dict.faq?.a5 ||
+        'The Community Node is 100% open source and free forever. You can fork the repository, deploy it to your own AWS account, and start using the core autonomous engine today.',
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-cyber-blue/30 selection:text-cyber-blue font-sans text-left">
       <JsonLd data={CLAW_MORE_JSON_LD} />
-      <Navbar />
+      <Navbar dict={dict} />
 
       <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden border-b border-white/5 isolate py-20">
         {/* Cinematic Background Image - STACKING FIX & MAXIMUM IMPACT */}
@@ -110,21 +117,19 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
 
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-cyber-blue/40 bg-cyber-blue/10 text-cyber-blue text-[10px] font-mono uppercase tracking-[0.3em] mb-12 shadow-[0_0_30px_rgba(0,224,255,0.15)] backdrop-blur-sm">
             <Activity className="w-3 h-3" />
-            <span>Autonomous Infrastructure Synthesis</span>
+            <span>{dict.hero.badge}</span>
           </div>
 
           {/* Cache-buster: v2-gradient */}
           <h1 className="text-6xl md:text-9xl font-black tracking-tighter mb-10 bg-gradient-to-r from-[#00e0ff] to-[#bc00ff] bg-clip-text text-transparent leading-[1.2] pb-4 drop-shadow-[0_10px_60px_rgba(0,0,0,1)]">
-            Never-Dying,
+            {dict.hero.title1}
             <br />
-            <span className="italic">Self-Evolving</span> Claw
+            <span className="italic">{dict.hero.title2}</span>{' '}
+            {dict.hero.title3}
           </h1>
 
           <p className="text-xl text-white/90 max-w-2xl mx-auto mb-14 leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
-            <span className="text-cyber-blue font-bold">Serverless</span>, but{' '}
-            <span className="text-cyber-purple font-bold">ClawMore!</span> We
-            interpret intent and persist infrastructure mutations to source
-            control while you sleep.
+            {dict.hero.description}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
@@ -132,14 +137,14 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
               href="https://github.com/caopengau/serverlessclaw"
               className="px-12 py-5 rounded-sm bg-white text-black hover:bg-cyber-blue transition-all font-black uppercase tracking-widest flex items-center gap-3 group shadow-[0_0_50px_rgba(255,255,255,0.2)] text-center"
             >
-              Start Free
+              {dict.common.startFree}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <button
               onClick={() => openModal('beta')}
               className="px-12 py-5 rounded-sm border border-white/20 bg-white/5 hover:bg-white/10 transition-all font-bold uppercase tracking-widest text-[14px] backdrop-blur-md"
             >
-              Managed Beta Access
+              {dict.common.managedBetaAccess}
             </button>
           </div>
         </div>
@@ -147,7 +152,12 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
 
       {/* Lead Generation Modal */}
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <LeadForm type={modalType} onSuccess={closeModal} apiUrl={apiUrl} />
+        <LeadForm
+          type={modalType}
+          onSuccess={closeModal}
+          apiUrl={apiUrl}
+          dict={dict}
+        />
       </Modal>
 
       {/* Core Pillars */}
@@ -160,16 +170,10 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                 <RefreshCcw className="w-7 h-7" />
               </div>
               <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                Autonomous Evolution
+                {dict.pillars.autonomous.title}
               </h3>
               <p className="text-zinc-500 leading-relaxed text-sm">
-                Recursive Git-driven loops that close the gap between reasoning
-                and code. The system monitors its own performance logs and
-                triggers{' '}
-                <span className="text-zinc-300">
-                  Self-Correction Requests (SCR)
-                </span>{' '}
-                autonomously.
+                {dict.pillars.autonomous.desc}
               </p>
             </div>
 
@@ -178,15 +182,10 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                 <Cpu className="w-7 h-7" />
               </div>
               <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                Neural Spine
+                {dict.pillars.neural.title}
               </h3>
               <p className="text-zinc-500 leading-relaxed text-sm">
-                Architected on AWS EventBridge for decoupled agent coordination.
-                Stateless execution with{' '}
-                <span className="text-purple-400 font-mono text-[10px] uppercase tracking-tighter">
-                  Unlimited_Breadth
-                </span>{' '}
-                via the ClawFlow mesh.
+                {dict.pillars.neural.desc}
               </p>
             </div>
 
@@ -195,12 +194,10 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                 <ShieldCheck className="w-7 h-7" />
               </div>
               <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                Ironclad BYOC
+                {dict.pillars.byoc.title}
               </h3>
               <p className="text-zinc-500 leading-relaxed text-sm">
-                Keep your neural weight in your own VPC. Deploy with strict{' '}
-                <span className="text-cyber-purple">Recursion Guards</span> and
-                Human-in-the-Loop context isolation for enterprise safety.
+                {dict.pillars.byoc.desc}
               </p>
             </div>
           </div>
@@ -216,41 +213,17 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
           <div className="flex flex-col lg:flex-row items-center gap-20">
             <div className="flex-1">
               <div className="text-cyber-blue font-mono text-[10px] uppercase tracking-[0.4em] mb-4">
-                Core_Process_Visualizer
+                {dict.evolution.visualizer}
               </div>
               <h2 className="text-5xl font-black mb-8 tracking-tighter italic">
-                The Mutation Cycle
+                {dict.evolution.title}
               </h2>
               <p className="text-zinc-400 mb-10 leading-relaxed text-lg font-light">
-                Standard agents are transient. ClawMore treats its primary logic
-                as <span className="text-white italic">Mutable State</span>.
-                When a capability gap is detected, the Planner sintetizes a
-                patch and the Coder commits it directly to the monorepo branch.
+                {dict.evolution.desc}
               </p>
 
               <div className="space-y-4">
-                {[
-                  {
-                    label: 'GAP_DETECTION',
-                    desc: 'Reflector identifies functional deficiencies',
-                    color: 'cyber-blue',
-                  },
-                  {
-                    label: 'SYNTHESIS_PLAN',
-                    desc: 'Architect designs the mutation path',
-                    color: 'purple-400',
-                  },
-                  {
-                    label: 'EXECUTION_OPS',
-                    desc: 'Coder implements & SST Ion deploys infra',
-                    color: 'cyber-blue',
-                  },
-                  {
-                    label: 'GIT_PERSISTENCE',
-                    desc: 'Verified code is merged back to main',
-                    color: 'white',
-                  },
-                ].map((item, idx) => (
+                {dict.evolution.steps.map((item: any, idx: number) => (
                   <div
                     key={idx}
                     className="flex gap-6 p-5 rounded-sm border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group"
@@ -278,7 +251,7 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                   <div className="flex items-center gap-2">
                     <Terminal className="w-4 h-4 text-cyber-blue" />
                     <span className="text-white font-bold tracking-tighter uppercase">
-                      Evolution_Stream.log
+                      {dict.evolution.logTitle}
                     </span>
                   </div>
                   <div className="flex gap-1.5">
@@ -293,7 +266,7 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                     <span className="text-cyber-blue uppercase">
                       Node_Status:
                     </span>{' '}
-                    SYNCHRONIZED
+                    {dict.evolution.logStatus}
                   </div>
                   <div className="text-zinc-600 font-bold">
                     [01:14:17]{' '}
@@ -301,7 +274,7 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                     Scoped Gap Analysis initiated...
                   </div>
                   <div className="pl-4 text-zinc-500 italic">
-                    {'>>'} Identified deficiency in AdaptiveRateLimiters
+                    {'>>'} {dict.evolution.logIdentify}
                   </div>
                   <div className="text-zinc-600 font-bold">
                     [01:14:22]{' '}
@@ -324,9 +297,9 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
                       <Zap size={40} />
                     </div>
                     <div className="font-black mb-1 text-white underline decoration-cyber-blue decoration-2 underline-offset-4">
-                      MUTATION_VERIFIED
+                      {dict.evolution.mutVerified}
                     </div>
-                    <div>+ infra: added JIT concurrency scaling</div>
+                    <div>{dict.evolution.mutAdded}</div>
                     <div className="text-[8px] opacity-60 mt-2">
                       HASH: 5086da9f3c6d8e2d494195...
                     </div>
@@ -345,13 +318,13 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
             <div className="text-purple-400 font-mono text-xs uppercase tracking-[0.5em] mb-4">
-              Sustenance_Model
+              {dict.pricing.model}
             </div>
             <h2 className="text-5xl font-black mb-6 tracking-tighter italic">
-              Transparent Resource Alloc
+              {dict.pricing.title}
             </h2>
             <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest font-bold">
-              Pay for successful mutations only.
+              {dict.pricing.subtitle}
             </p>
           </div>
 
@@ -359,84 +332,78 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
             {/* Free Tier - STYLISH & EQUAL */}
             <div className="glass-card p-10 flex flex-col border-purple-500/30 bg-purple-500/[0.03] hover:border-purple-500/50 transition-all shadow-[0_0_80px_rgba(188,0,255,0.08)] relative">
               <div className="absolute top-0 right-10 -translate-y-1/2 px-4 py-1.5 rounded-sm bg-purple-600 text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(188,0,255,0.3)] z-10">
-                OPEN SOURCE
+                {dict.pricing.community.badge}
               </div>
               <div className="mb-10">
                 <h4 className="text-purple-400 font-mono text-xs uppercase tracking-widest font-black mb-2">
-                  Community_Node
+                  {dict.pricing.community.name}
                 </h4>
                 <div className="flex items-baseline gap-2">
                   <div className="text-6xl font-black tracking-tight text-white">
-                    FREE
+                    {dict.pricing.community.price}
                   </div>
                 </div>
                 <p className="text-xs font-mono text-purple-300 uppercase mt-4 tracking-tighter font-bold">
-                  Self-Hosted & Open Source Forever
+                  {dict.pricing.community.subtext}
                 </p>
               </div>
               <ul className="space-y-5 mb-12 flex-grow">
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <ShieldCheck className="w-5 h-5 text-purple-400" /> Full OSS
-                  Core Engine
-                </li>
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <GitBranch className="w-5 h-5 text-purple-400" /> Unlimited
-                  Local Archetypes
-                </li>
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <Globe className="w-5 h-5 text-purple-400" /> Complete VPC
-                  Isolation
-                </li>
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <Code className="w-5 h-5 text-purple-400" /> MIT Licensed
-                </li>
+                {dict.pricing.community.features.map(
+                  (feature: string, idx: number) => (
+                    <li
+                      key={idx}
+                      className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight"
+                    >
+                      <ShieldCheck className="w-5 h-5 text-purple-400" />{' '}
+                      {feature}
+                    </li>
+                  )
+                )}
               </ul>
               <Link
                 href="https://github.com/caopengau/serverlessclaw"
                 className="w-full py-5 rounded-sm bg-purple-600 hover:bg-purple-500 transition-all text-white text-xs font-black uppercase text-center tracking-widest shadow-[0_0_25px_rgba(188,0,255,0.2)]"
               >
-                Get Started Free (OSS)
+                {dict.common.startFree} (OSS)
               </Link>
             </div>
 
             {/* Pro Tier - EQUAL SCALE */}
             <div className="glass-card p-10 border-cyber-blue/30 bg-cyber-blue/[0.03] relative flex flex-col hover:border-cyber-blue/50 transition-all shadow-[0_0_80px_rgba(0,224,255,0.08)]">
               <div className="absolute top-0 right-10 -translate-y-1/2 px-4 py-1.5 rounded-sm bg-cyber-blue text-black text-[10px] font-black uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(0,224,255,0.3)] z-10">
-                MANAGED
+                {dict.pricing.managed.badge}
               </div>
               <div className="mb-10">
                 <h4 className="text-cyber-blue font-mono text-xs uppercase tracking-widest font-black mb-2">
-                  Managed_Core
+                  {dict.pricing.managed.name}
                 </h4>
                 <div className="text-6xl font-black tracking-tight text-white">
-                  $29
+                  {dict.pricing.managed.price}
                   <span className="text-2xl font-normal text-zinc-500">
-                    /mo
+                    {dict.pricing.managed.period}
                   </span>
                 </div>
                 <p className="text-xs font-mono text-cyber-blue uppercase mt-4 tracking-tighter font-bold">
-                  Infrastructure + Cloud Ops
+                  {dict.pricing.managed.subtext}
                 </p>
               </div>
               <ul className="space-y-5 mb-12 flex-grow">
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <Zap className="w-5 h-5 text-cyber-blue" /> Remote SaaS
-                  Dashboard
-                </li>
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <RefreshCcw className="w-5 h-5 text-cyber-blue" />{' '}
-                  Auto-Mutation Sync
-                </li>
-                <li className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight">
-                  <MessageSquare className="w-5 h-5 text-cyber-blue" /> Priority
-                  24/7 Feedback Loop
-                </li>
+                {dict.pricing.managed.features.map(
+                  (feature: string, idx: number) => (
+                    <li
+                      key={idx}
+                      className="flex items-center gap-3 text-sm text-zinc-100 font-mono uppercase tracking-tight"
+                    >
+                      <Zap className="w-5 h-5 text-cyber-blue" /> {feature}
+                    </li>
+                  )
+                )}
               </ul>
               <Link
                 href="#waitlist"
                 className="w-full py-5 rounded-sm bg-cyber-blue hover:bg-cyber-blue/90 transition-all text-black text-xs font-black uppercase text-center tracking-widest shadow-[0_0_25px_rgba(0,224,255,0.2)]"
               >
-                Join Managed Waitlist
+                {dict.common.managedWaitlist}
               </Link>
             </div>
           </div>
@@ -445,22 +412,17 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
             <div className="flex items-center gap-3 mb-4">
               <Activity className="w-5 h-5 text-purple-400" />
               <h5 className="font-mono text-xs font-black uppercase tracking-[0.4em] text-purple-400">
-                The Evolution_Tax.cfg
+                {dict.pricing.tax.title}
               </h5>
             </div>
             <p className="text-sm text-zinc-400 font-mono leading-relaxed tracking-tight">
-              We align our success with your system&apos;s growth. We deduct{' '}
-              <span className="text-white font-bold">
-                $1 per verified mutation
-              </span>{' '}
-              (an autonomous commit that successfully passes all CI/CD gates).
-              Stagnant systems pay zero.
+              {dict.pricing.tax.desc}
             </p>
           </div>
         </div>
       </section>
 
-      <FAQ items={FAQ_ITEMS} />
+      <FAQ items={FAQ_ITEMS} title={dict.faq.title} />
 
       {/* Footer */}
       <footer className="py-20 border-t border-white/5 bg-black/40">
@@ -478,7 +440,7 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
             </span>
           </div>
           <div className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] font-bold">
-            Part of the{' '}
+            {dict.footer.ecosystem}{' '}
             <Link
               href="https://getaiready.dev"
               className="text-zinc-400 hover:text-cyber-blue transition-colors underline decoration-white/10 underline-offset-4"
@@ -486,9 +448,7 @@ export default function ClawMoreClient({ apiUrl }: ClawMoreClientProps) {
               AIReady_Ecosystem
             </Link>{' '}
             neural network.
-            <div className="mt-6 opacity-40">
-              © 2026 PERPETUAL_EVOLUTION. TERMINAL_LOCKED.
-            </div>
+            <div className="mt-6 opacity-40">{dict.footer.copyright}</div>
           </div>
         </div>
       </footer>

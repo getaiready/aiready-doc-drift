@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
+import { headers } from 'next/headers';
 import ClawMoreClient from './ClawMoreClient';
+import { getDictionary } from '../lib/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'ClawMore - Scale Your Agency with AI Content Operations',
@@ -35,9 +37,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ClawMorePage() {
+export default async function ClawMorePage() {
+  const headerList = await headers();
+  const locale = headerList.get('X-NEXT-LOCALE') || 'en';
+  const dictionary = await getDictionary(locale);
   // Use environment variable which SST correctly injects at runtime
   const apiUrl = process.env.LEAD_API_URL || '';
 
-  return <ClawMoreClient apiUrl={apiUrl} />;
+  return <ClawMoreClient apiUrl={apiUrl} dict={dictionary} />;
 }

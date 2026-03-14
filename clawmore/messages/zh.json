@@ -1,0 +1,114 @@
+{
+  "common": {
+    "startFree": "免费开始",
+    "managedBetaAccess": "托管版 Beta 访问",
+    "managedWaitlist": "加入托管版候补名单",
+    "requestPriority": "请求优先访问权",
+    "joinWaitlist": "加入候补名单"
+  },
+  "hero": {
+    "badge": "自主式基础架构合成",
+    "title1": "永不凋零，",
+    "title2": "自我进化",
+    "title3": "的 Claw",
+    "description": "无服务器，但不仅限于此 (ClawMore)！在您入睡时，我们能理解意图并将基础架构变更持久化回源代码控制系统。"
+  },
+  "pillars": {
+    "autonomous": {
+      "title": "自主进化",
+      "desc": "基于 Git 的递归循环，弥合了推理与代码之间的鸿沟。系统自主监控其性能日志，并自动触发自修复请求 (SCR)。"
+    },
+    "neural": {
+      "title": "神经主干",
+      "desc": "基于 AWS EventBridge 架构，实现解耦的智能代理协同。通过 ClawFlow 网格，实现具有“无限宽度”的无状态执行。"
+    },
+    "byoc": {
+      "title": "坚不可摧的 BYOC",
+      "desc": "将您的神经权重保留在您自己的 VPC 中。采用严格的递归防护和人工干预上下文隔离进行部署，确保企业级安全。"
+    }
+  },
+  "evolution": {
+    "title": "突变周期",
+    "desc": "普通的智能体是暂时的。ClawMore 将其次要逻辑视为“可变状态”。当检测到功能缺失时，Planner（计划员）合成补丁，Coder（编码员）直接将其提交到 monorepo 分支。",
+    "visualizer": "核心流程可视化器",
+    "logTitle": "Evolution_Stream.log",
+    "logStatus": "已同步 (SYNCHRONIZED)",
+    "logIdentify": "检测到 AdaptiveRateLimiters 存在缺陷",
+    "mutVerified": "突变已验证 (MUTATION_VERIFIED)",
+    "mutAdded": "+ infra: 添加了即时 (JIT) 并发扩展",
+    "steps": [
+      {
+        "label": "缺失检测 (GAP_DETECTION)",
+        "desc": "Reflector 识别功能缺陷"
+      },
+      {
+        "label": "合成计划 (SYNTHESIS_PLAN)",
+        "desc": "Architect（架构师）设计突变路径"
+      },
+      {
+        "label": "执行操作 (EXECUTION_OPS)",
+        "desc": "Coder（编码员）实施且 SST Ion 部署基础设施"
+      },
+      {
+        "label": "GIT 持久化",
+        "desc": "经验证的代码合并回主分支"
+      }
+    ]
+  },
+  "pricing": {
+    "model": "生存模型 (Sustenance_Model)",
+    "title": "透明资源分配",
+    "subtitle": "仅为成功的“突变”付费。",
+    "community": {
+      "name": "社区版节点",
+      "badge": "开源",
+      "price": "免费",
+      "subtext": "永久自托管和开源",
+      "features": [
+        "完整开源核心逻辑引擎",
+        "无限量本地原型 (Archetypes)",
+        "完全 VPC 隔离",
+        "MIT 许可协议"
+      ]
+    },
+    "managed": {
+      "name": "托管版核心",
+      "badge": "托管型",
+      "price": "$29",
+      "period": "/月",
+      "subtext": "基础架构 + 云端运维",
+      "features": ["远程 SaaS 管理控制台", "自动突变同步", "全天候优先反馈闭环"]
+    },
+    "tax": {
+      "title": "进化税 (Evolution_Tax.cfg)",
+      "desc": "我们的成功与您的系统增长相一致。我们对每次经过验证的突变（通过所有 CI/CD 门槛的自主提交）收取 1 美元。停滞不前的系统无需支付任何突变费用。"
+    }
+  },
+  "faq": {
+    "title": "常见问题"
+  },
+  "footer": {
+    "ecosystem": "AIReady 生态系统神经网络的一部分。",
+    "copyright": "© 2026 永恒进化 (PERPETUAL_EVOLUTION). 终端锁定。"
+  },
+  "navbar": {
+    "features": "特性",
+    "evolution": "演进",
+    "pricing": "价格",
+    "blog": "博客",
+    "source": "源码",
+    "backToJournal": "返回日志"
+  },
+  "leadForm": {
+    "successTitle": "您已加入名单！",
+    "betaSuccess": "感谢您申请托管版 Beta。我们会尽快与您联系。",
+    "waitlistSuccess": "您已成功加入候补名单。我们将向您通报我们的进展。",
+    "betaTitle": "请求托管版 Beta",
+    "waitlistTitle": "加入候补名单",
+    "betaDesc": "优先访问我们的全托管自主基础架构服务。",
+    "waitlistDesc": "第一时间了解我们何时为自我演进的基础架构引擎开放新名额。",
+    "nameLabel": "全名",
+    "emailLabel": "电子邮箱地址",
+    "notesLabel": "备注 / 使用场景（可选）"
+  }
+}

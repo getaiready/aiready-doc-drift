@@ -8,9 +8,15 @@ interface LeadFormProps {
   type: 'beta' | 'waitlist';
   apiUrl: string;
   onSuccess?: () => void;
+  dict: any;
 }
 
-export default function LeadForm({ type, apiUrl, onSuccess }: LeadFormProps) {
+export default function LeadForm({
+  type,
+  apiUrl,
+  onSuccess,
+  dict,
+}: LeadFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
@@ -65,12 +71,14 @@ export default function LeadForm({ type, apiUrl, onSuccess }: LeadFormProps) {
           <CheckCircle2 className="w-10 h-10 text-cyber-green" />
         </motion.div>
         <h3 className="text-2xl font-bold text-white mb-2">
-          You're on the list!
+          {dict.leadForm?.successTitle || "You're on the list!"}
         </h3>
         <p className="text-white/60">
           {isBeta
-            ? "Thank you for applying for managed beta. We'll be in touch shortly."
-            : "You've successfully joined the waitlist. We'll update you on our progress."}
+            ? dict.leadForm?.betaSuccess ||
+              "Thank you for applying for managed beta. We'll be in touch shortly."
+            : dict.leadForm?.waitlistSuccess ||
+              "You've successfully joined the waitlist. We'll update you on our progress."}
         </p>
       </div>
     );
@@ -80,19 +88,23 @@ export default function LeadForm({ type, apiUrl, onSuccess }: LeadFormProps) {
     <div className="p-8">
       <div className="mb-8">
         <h3 className="text-2xl font-black tracking-tight text-white mb-2">
-          {isBeta ? 'Request Managed Beta' : 'Join the Waitlist'}
+          {isBeta
+            ? dict.leadForm?.betaTitle || 'Request Managed Beta'
+            : dict.leadForm?.waitlistTitle || 'Join the Waitlist'}
         </h3>
         <p className="text-white/50 text-sm">
           {isBeta
-            ? 'Get prioritized access to our fully managed autonomous infrastructure service.'
-            : 'Be the first to know when we open up new slots for our self-evolving infrastructure engine.'}
+            ? dict.leadForm?.betaDesc ||
+              'Get prioritized access to our fully managed autonomous infrastructure service.'
+            : dict.leadForm?.waitlistDesc ||
+              'Be the first to know when we open up new slots for our self-evolving infrastructure engine.'}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1.5 ml-1">
-            Full Name
+            {dict.leadForm?.nameLabel || 'Full Name'}
           </label>
           <input
             type="text"
@@ -105,7 +117,7 @@ export default function LeadForm({ type, apiUrl, onSuccess }: LeadFormProps) {
 
         <div>
           <label className="block text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1.5 ml-1">
-            Email Address
+            {dict.leadForm?.emailLabel || 'Email Address'}
           </label>
           <input
             type="email"
@@ -119,7 +131,7 @@ export default function LeadForm({ type, apiUrl, onSuccess }: LeadFormProps) {
 
         <div>
           <label className="block text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1.5 ml-1">
-            Notes / Use Case (Optional)
+            {dict.leadForm?.notesLabel || 'Notes / Use Case (Optional)'}
           </label>
           <textarea
             value={notes}
@@ -142,7 +154,9 @@ export default function LeadForm({ type, apiUrl, onSuccess }: LeadFormProps) {
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <>
-              {isBeta ? 'Request Priority Access' : 'Join Waitlist'}
+              {isBeta
+                ? dict.common.requestPriority || 'Request Priority Access'
+                : dict.common.joinWaitlist || 'Join Waitlist'}
               <Send className="w-4 h-4" />
             </>
           )}

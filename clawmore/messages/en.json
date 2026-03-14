@@ -1,0 +1,118 @@
+{
+  "common": {
+    "startFree": "Start Free",
+    "managedBetaAccess": "Managed Beta Access",
+    "managedWaitlist": "Join Managed Waitlist",
+    "requestPriority": "Request Priority Access",
+    "joinWaitlist": "Join Waitlist"
+  },
+  "hero": {
+    "badge": "Autonomous Infrastructure Synthesis",
+    "title1": "Never-Dying,",
+    "title2": "Self-Evolving",
+    "title3": "Claw",
+    "description": "Serverless, but ClawMore! We interpret intent and persist infrastructure mutations to source control while you sleep."
+  },
+  "pillars": {
+    "autonomous": {
+      "title": "Autonomous Evolution",
+      "desc": "Recursive Git-driven loops that close the gap between reasoning and code. The system monitors its own performance logs and triggers Self-Correction Requests (SCR) autonomously."
+    },
+    "neural": {
+      "title": "Neural Spine",
+      "desc": "Architected on AWS EventBridge for decoupled agent coordination. Stateless execution with Unlimited_Breadth via the ClawFlow mesh."
+    },
+    "byoc": {
+      "title": "Ironclad BYOC",
+      "desc": "Keep your neural weight in your own VPC. Deploy with strict Recursion Guards and Human-in-the-Loop context isolation for enterprise safety."
+    }
+  },
+  "evolution": {
+    "title": "The Mutation Cycle",
+    "desc": "Standard agents are transient. ClawMore treats its primary logic as Mutable State. When a capability gap is detected, the Planner sintetizes a patch and the Coder commits it directly to the monorepo branch.",
+    "visualizer": "Core_Process_Visualizer",
+    "logTitle": "Evolution_Stream.log",
+    "logStatus": "SYNCHRONIZED",
+    "logIdentify": "Identified deficiency in AdaptiveRateLimiters",
+    "mutVerified": "MUTATION_VERIFIED",
+    "mutAdded": "+ infra: added JIT concurrency scaling",
+    "steps": [
+      {
+        "label": "GAP_DETECTION",
+        "desc": "Reflector identifies functional deficiencies"
+      },
+      {
+        "label": "SYNTHESIS_PLAN",
+        "desc": "Architect designs the mutation path"
+      },
+      {
+        "label": "EXECUTION_OPS",
+        "desc": "Coder implements & SST Ion deploys infra"
+      },
+      {
+        "label": "GIT_PERSISTENCE",
+        "desc": "Verified code is merged back to main"
+      }
+    ]
+  },
+  "pricing": {
+    "model": "Sustenance_Model",
+    "title": "Transparent Resource Alloc",
+    "subtitle": "Pay for successful mutations only.",
+    "community": {
+      "name": "Community_Node",
+      "badge": "OPEN SOURCE",
+      "price": "FREE",
+      "subtext": "Self-Hosted & Open Source Forever",
+      "features": [
+        "Full OSS Core Engine",
+        "Unlimited Local Archetypes",
+        "Complete VPC Isolation",
+        "MIT Licensed"
+      ]
+    },
+    "managed": {
+      "name": "Managed_Core",
+      "badge": "MANAGED",
+      "price": "$29",
+      "period": "/mo",
+      "subtext": "Infrastructure + Cloud Ops",
+      "features": [
+        "Remote SaaS Dashboard",
+        "Auto-Mutation Sync",
+        "Priority 24/7 Feedback Loop"
+      ]
+    },
+    "tax": {
+      "title": "The Evolution_Tax.cfg",
+      "desc": "We align our success with your system's growth. We deduct $1 per verified mutation (an autonomous commit that successfully passes all CI/CD gates). Stagnant systems pay zero."
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions"
+  },
+  "footer": {
+    "ecosystem": "Part of the AIReady_Ecosystem neural network.",
+    "copyright": "© 2026 PERPETUAL_EVOLUTION. TERMINAL_LOCKED."
+  },
+  "navbar": {
+    "features": "Features",
+    "evolution": "Evolution",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "source": "Source",
+    "backToJournal": "Back to Journal"
+  },
+  "leadForm": {
+    "successTitle": "You're on the list!",
+    "betaSuccess": "Thank you for applying for managed beta. We'll be in touch shortly.",
+    "waitlistSuccess": "You've successfully joined the waitlist. We'll update you on our progress.",
+    "betaTitle": "Request Managed Beta",
+    "waitlistTitle": "Join the Waitlist",
+    "betaDesc": "Get prioritized access to our fully managed autonomous infrastructure service.",
+    "waitlistDesc": "Be the first to know when we open up new slots for our self-evolving infrastructure engine.",
+    "nameLabel": "Full Name",
+    "emailLabel": "Email Address",
+    "notesLabel": "Notes / Use Case (Optional)"
+  }
+}
