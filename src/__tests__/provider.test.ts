@@ -24,7 +24,7 @@ describe('Change Amplification Provider', () => {
     const output = await ChangeAmplificationProvider.analyze({ rootDir: '.' });
 
     expect(output.summary.totalFiles).toBe(1);
-    expect(output.metadata.toolName).toBe('change-amplification');
+    expect(output.metadata!.toolName).toBe('change-amplification');
   });
 
   it('should score an output', () => {
