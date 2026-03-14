@@ -28,7 +28,7 @@ describe('Doc Drift Provider', () => {
     const output = await DocDriftProvider.analyze({ rootDir: '.' });
 
     expect(output.summary.filesAnalyzed).toBe(1);
-    expect(output.metadata.toolName).toBe('doc-drift');
+    expect(output.metadata!.toolName).toBe('doc-drift');
   });
 
   it('should score an output', () => {

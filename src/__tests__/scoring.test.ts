@@ -9,7 +9,7 @@ describe('Doc Drift Scoring', () => {
       filesAnalyzed: 10,
       functionsAnalyzed: 50,
       score: 70,
-      rating: 'good',
+      rating: 'moderate',
     },
     issues: [],
     rawData: {
