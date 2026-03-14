@@ -4,14 +4,11 @@ import {
   SpokeOutput,
   ScanOptions,
   ToolScoringOutput,
-  AnalysisResult,
   SpokeOutputSchema,
+  buildSimpleProviderScore,
 } from '@aiready/core';
 import { analyzeChangeAmplification } from './analyzer';
-import {
-  ChangeAmplificationOptions,
-  FileChangeAmplificationResult,
-} from './types';
+import { ChangeAmplificationOptions } from './types';
 
 /**
  * Change Amplification Tool Provider
@@ -26,7 +23,7 @@ export const ChangeAmplificationProvider: ToolProvider = {
     );
 
     return SpokeOutputSchema.parse({
-      results: report.results as AnalysisResult[],
+      results: report.results as any,
       summary: report.summary,
       metadata: {
         toolName: ToolName.ChangeAmplification,
@@ -36,22 +33,11 @@ export const ChangeAmplificationProvider: ToolProvider = {
     });
   },
 
-  score(output: SpokeOutput, options: ScanOptions): ToolScoringOutput {
-    const summary = output.summary as any;
-
-    return {
-      toolName: ToolName.ChangeAmplification,
-      score: summary.score || 0,
-      rawMetrics: summary,
-      factors: [],
-      recommendations: (summary.recommendations || []).map(
-        (action: string) => ({
-          action,
-          estimatedImpact: 5,
-          priority: 'medium',
-        })
-      ),
-    };
+  score(output: SpokeOutput): ToolScoringOutput {
+    return buildSimpleProviderScore(
+      ToolName.ChangeAmplification,
+      output.summary as any
+    );
   },
 
   defaultWeight: 8,
