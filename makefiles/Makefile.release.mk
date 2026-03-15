@@ -145,7 +145,7 @@ release-clawmore-prod: ## Release ClawMore to production: TYPE=patch|minor|major
 	@cd $(CLAWMORE_DIR) && pnpm build
 	@$(MAKE) -C $(ROOT_DIR) deploy-clawmore-prod
 	@$(MAKE) -C $(ROOT_DIR) clawmore-verify || $(call log_warning,Verification timed out - may still be deploying)
-	@$(MAKE) -C $(ROOT_DIR) test-clawmore-e2e-local
+	@$(MAKE) -C $(ROOT_DIR) test-clawmore-e2e-prod
 	@$(MAKE) -C $(ROOT_DIR) publish-clawmore OWNER=$(OWNER)
 	@cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags
 	@$(call log_success,Release finished for clawmore)

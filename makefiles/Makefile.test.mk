@@ -107,7 +107,12 @@ test-downstream: ## Run all downstream verification tests (platform, visualizer,
 	@$(MAKE) test-landing || exit 1
 	@$(call log_success,All downstream services verified)
 
-test-clawmore-e2e-local: ## Run ClawMore E2E tests locally
-	@$(call log_step,Running ClawMore E2E tests...)
-	@cd clawmore && pnpm exec playwright test e2e/seo.spec.ts
+test-clawmore-e2e-local: ## Run ClawMore E2E tests locally (uses next dev, not sst dev)
+	@$(call log_step,Running ClawMore E2E tests locally...)
+	@cd clawmore && pnpm exec playwright test e2e/seo.spec.ts --config playwright.config.local.ts
 	@$(call log_success,ClawMore tests passed)
+
+test-clawmore-e2e-prod: ## Run ClawMore E2E tests against live production site
+	@$(call log_step,Running ClawMore E2E tests against production...)
+	@cd clawmore && BASE_URL=https://clawmore.getaiready.dev pnpm exec playwright test e2e/seo.spec.ts --config playwright.config.prod.ts
+	@$(call log_success,ClawMore production tests passed)

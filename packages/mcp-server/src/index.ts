@@ -5,7 +5,6 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { ToolRegistry, ToolName } from '@aiready/core';
-import chalk from 'chalk';
 
 // Pre-load essential tools (following CLI pattern)
 // In a real implementation, we would want to dynamically load these
@@ -36,7 +35,7 @@ export class AIReadyMcpServer {
     this.setupHandlers();
 
     this.server.onerror = (error) => {
-      console.error(chalk.red('[MCP Error]'), error);
+      console.error('[MCP Error]', error);
     };
   }
 
@@ -78,7 +77,7 @@ export class AIReadyMcpServer {
           throw new Error('Missing required argument: path');
         }
 
-        console.error(chalk.blue(`[MCP] Executing ${name} on ${args.path}`));
+        console.error(`[MCP] Executing ${name} on ${args.path}`);
 
         const results = await provider.analyze({
           rootDir: args.path,
@@ -110,13 +109,13 @@ export class AIReadyMcpServer {
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error(chalk.green('AIReady MCP Server started'));
+    console.error('AIReady MCP Server started');
   }
 }
 
 // Bootstrap the server
 const server = new AIReadyMcpServer();
 server.run().catch((error) => {
-  console.error(chalk.red('Fatal error starting AIReady MCP Server:'), error);
+  console.error('Fatal error starting AIReady MCP Server:', error);
   process.exit(1);
 });
