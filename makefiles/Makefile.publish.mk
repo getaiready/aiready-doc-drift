@@ -493,8 +493,30 @@ publish-action-sync: ## Sync GitHub Action to standalone repo. Usage: make publi
 	fi
 
 # ============================================================================
+# MCP Server Publishing
+# ============================================================================
+
+publish-mcp-smithery: ## Publish MCP Server to Smithery (requires SMITHERY_API_KEY in packages/mcp-server/.env.smithery)
+	@$(call log_step,Publishing MCP Server to Smithery...); \
+	if [ -f packages/mcp-server/.env.smithery ]; then \
+		echo "[INFO] Loading SMITHERY_API_KEY from packages/mcp-server/.env.smithery"; \
+		set a; . packages/mcp-server/.env.smithery; set +a; \
+	fi; \
+	if [ -z "$$SMITHERY_API_KEY" ]; then \
+		echo "[ERROR] SMITHERY_API_KEY not set. Add it to packages/mcp-server/.env.smithery"; \
+		exit 1; \
+	fi; \
+	echo "[INFO] Note: Smithery CLI v4+ defaults to hosted 'shttp' deployment which requires a paid plan."; \
+	echo "[INFO] For open-source projects, the registry supports adding the GitHub URL directly via the web UI."; \
+	echo "[INFO] Please navigate to https://smithery.ai/new or https://smithery.ai/submit"; \
+	echo "[INFO] and provide the GitHub repository URL: https://github.com/$(OWNER)/aiready"; \
+	echo "[INFO] Smithery will automatically read the smithery.yaml configuration."; \
+	$(call log_success,MCP Server registry submission guidelines provided.)
+
+# ============================================================================
 # VS Code Extension Publishing
 # ============================================================================
+
 
 publish-vscode: ## Publish VS Code extension to Marketplace (requires VSCE_PAT env var)
 	@$(call log_step,Publishing VS Code extension...); \
