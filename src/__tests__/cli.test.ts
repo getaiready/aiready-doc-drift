@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { changeAmplificationAction } from '../cli';
-import * as analyzer from '../analyzer';
 import * as fs from 'fs';
 
 vi.mock('../analyzer', () => ({
