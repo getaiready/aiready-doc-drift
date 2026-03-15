@@ -111,11 +111,22 @@ export class AIReadyMcpServer {
     await this.server.connect(transport);
     console.error('AIReady MCP Server started');
   }
+
+  getServer(): Server {
+    return this.server;
+  }
+}
+
+export function createSandboxServer(): Server {
+  const mcp = new AIReadyMcpServer();
+  return mcp.getServer();
 }
 
 // Bootstrap the server
-const server = new AIReadyMcpServer();
-server.run().catch((error) => {
+const mcpServer = new AIReadyMcpServer();
+mcpServer.run().catch((error) => {
   console.error('Fatal error starting AIReady MCP Server:', error);
   process.exit(1);
 });
+
+export default mcpServer;
