@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { Command } from 'commander';
 
 import { execSync } from 'child_process';
 
@@ -38,7 +37,7 @@ Type: ${type}
         console.log(chalk.green('✅ Issue Created Successfully!'));
         console.log(chalk.cyan(output));
         return;
-      } catch (error) {
+      } catch {
         console.error(chalk.red('\n❌ Failed to submit via gh CLI.'));
         console.log(
           chalk.yellow(

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { analyzeUnified, scoreUnified, generateUnifiedSummary } from '../index';
-import { ToolRegistry, ToolName } from '@aiready/core';
+import { ToolRegistry } from '@aiready/core';
 
 vi.mock('@aiready/core', async () => {
   const actual = await vi.importActual('@aiready/core');

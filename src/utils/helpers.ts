@@ -3,7 +3,7 @@
  */
 
 import { resolve as resolvePath } from 'path';
-import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import chalk from 'chalk';
 import { loadConfig, mergeConfigWithDefaults } from '@aiready/core';
 import type { ToolScoringOutput } from '@aiready/core';

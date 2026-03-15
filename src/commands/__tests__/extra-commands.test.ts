@@ -7,7 +7,6 @@ import { testabilityAction } from '../testability';
 import { depsHealthAction } from '../deps-health';
 import { patternsAction } from '../patterns';
 import { contextAction } from '../context';
-import * as core from '@aiready/core';
 
 vi.mock('@aiready/core', async () => {
   const actual = await vi.importActual('@aiready/core');

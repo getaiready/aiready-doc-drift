@@ -3,7 +3,7 @@ import { scanAction } from '../scan';
 import * as core from '@aiready/core';
 import * as index from '../../index';
 import * as upload from '../upload';
-import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { readFileSync } from 'fs';
 import { Severity } from '@aiready/core';
 
 vi.mock('../../index', () => ({
