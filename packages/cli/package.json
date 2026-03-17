@@ -1,6 +1,6 @@
 {
   "name": "@aiready/cli",
-  "version": "0.14.8",
+  "version": "0.14.9",
   "description": "Unified CLI for AIReady analysis tools",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
