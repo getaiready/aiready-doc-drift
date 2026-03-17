@@ -28,7 +28,7 @@ export async function analyzeDocDrift(
   const files = await scanFiles(options);
   const issues: DocDriftIssue[] = [];
   const staleMonths = options.staleMonths ?? 6;
-  const staleSeconds = staleMonths * 30 * 24 * 60 * 60;
+  // const staleSeconds = staleMonths * 30 * 24 * 60 * 60; // Unused, removed
 
   let uncommentedExports = 0;
   let totalExports = 0;
@@ -36,7 +36,7 @@ export async function analyzeDocDrift(
   let undocumentedComplexity = 0;
   let actualDrift = 0;
 
-  const now = Math.floor(Date.now() / 1000);
+  // const now = Math.floor(Date.now() / 1000); // Unused, removed
 
   let processed = 0;
   for (const file of files) {
