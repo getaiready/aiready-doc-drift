@@ -300,7 +300,7 @@ export async function scanAction(directory: string, options: ScanOptions) {
           }
         }
 
-        const modelId = options.model || 'claude-3-5-sonnet';
+        const modelId = options.model || 'gpt-5.4-mini';
         const roi = (await import('@aiready/core')).calculateBusinessROI({
           tokenWaste: unifiedBudget.wastedTokens.total,
           issues: allIssues,
