@@ -335,6 +335,28 @@ export async function analyzeUnified(
   });
 
   result.summary.executionTime = Date.now() - startTime;
+
+  // Add backward compatibility key mappings (kebab-case -> camelCase and aliases)
+  const keyMappings: Record<string, string[]> = {
+    'pattern-detect': ['patternDetect', 'patterns'],
+    'context-analyzer': ['contextAnalyzer', 'context'],
+    'naming-consistency': ['namingConsistency', 'consistency'],
+    'ai-signal-clarity': ['aiSignalClarity'],
+    'agent-grounding': ['agentGrounding'],
+    'testability-index': ['testabilityIndex', 'testability'],
+    'doc-drift': ['docDrift'],
+    'dependency-health': ['dependencyHealth', 'deps'],
+    'change-amplification': ['changeAmplification'],
+  };
+
+  for (const [kebabKey, aliases] of Object.entries(keyMappings)) {
+    if (result[kebabKey]) {
+      for (const alias of aliases) {
+        result[alias] = result[kebabKey];
+      }
+    }
+  }
+
   return result;
 }
 
