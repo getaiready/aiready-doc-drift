@@ -6,8 +6,6 @@
       "**/dist/**",
       "**/build/**",
       "**/.sst/**",
-      "**/*.test.ts",
-      "**/*.spec.ts",
       "landing/**",
       "clawmore/**"
     ],
@@ -24,9 +22,9 @@
   },
   "tools": {
     "pattern-detect": {
-      "minSimilarity": 0.6,
+      "minSimilarity": 0.5,
       "minLines": 5,
-      "batchSize": 100,
+      "batchSize": 200,
       "approx": true,
       "minSharedTokens": 5,
       "maxCandidatesPerBlock": 500
