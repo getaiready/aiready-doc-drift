@@ -88,8 +88,7 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/bridge-pattern-ephemeral-persistent.png',
+    image: '/blog-assets/bridge-pattern-ephemeral-persistent.png',
   };
 
   return (

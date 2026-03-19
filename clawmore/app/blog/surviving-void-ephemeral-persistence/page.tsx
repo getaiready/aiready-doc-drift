@@ -100,9 +100,8 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/surviving-void-ephemeral-persistence.png',
-    url: 'https://clawmore.getaiready.dev/blog-assets/surviving-void-ephemeral-persistence',
+    image: '/blog-assets/surviving-void-ephemeral-persistence.png',
+    url: '/blog-assets/surviving-void-ephemeral-persistence',
   };
 
   return (

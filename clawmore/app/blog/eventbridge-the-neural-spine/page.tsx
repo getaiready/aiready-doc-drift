@@ -87,8 +87,7 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/eventbridge-the-neural-spine.png',
+    image: '/blog-assets/eventbridge-the-neural-spine.png',
   };
 
   return (

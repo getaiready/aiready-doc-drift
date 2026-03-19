@@ -96,8 +96,7 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/death-of-the-transient-agent.png',
+    image: '/blog-assets/death-of-the-transient-agent.png',
   };
 
   return (

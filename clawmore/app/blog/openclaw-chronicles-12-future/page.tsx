@@ -64,8 +64,7 @@ export default function BlogPost() {
       '@type': 'Person',
       name: 'Architect of Evolution',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/openclaw-chronicles-12-future.png',
+    image: '/blog-assets/openclaw-chronicles-12-future.png',
     url: 'https://clawmore.getaiready.dev/blog/openclaw-chronicles-12-future',
   };
 

@@ -101,8 +101,7 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/ironclad-autonomy-safety-vpc.png',
+    image: '/blog-assets/ironclad-autonomy-safety-vpc.png',
   };
 
   return (

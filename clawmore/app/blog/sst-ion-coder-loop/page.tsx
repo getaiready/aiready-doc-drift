@@ -88,8 +88,8 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image: 'https://clawmore.getaiready.dev/blog-assets/sst-ion-coder-loop.png',
-    url: 'https://clawmore.getaiready.dev/blog-assets/sst-ion-coder-loop',
+    image: '/blog-assets/sst-ion-coder-loop.png',
+    url: '/blog-assets/sst-ion-coder-loop',
   };
 
   return (

@@ -102,8 +102,7 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/cdk-monorepo-mastery.png',
+    image: '/blog-assets/cdk-monorepo-mastery.png',
   };
 
   return (

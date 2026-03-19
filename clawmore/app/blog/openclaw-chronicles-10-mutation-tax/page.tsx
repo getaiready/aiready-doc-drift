@@ -76,8 +76,7 @@ export default function BlogPost() {
       '@type': 'Person',
       name: 'Architect of Evolution',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/openclaw-chronicles-10-mutation-tax.png',
+    image: '/blog-assets/openclaw-chronicles-10-mutation-tax.png',
     url: 'https://clawmore.getaiready.dev/blog/openclaw-chronicles-10-mutation-tax',
   };
 

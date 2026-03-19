@@ -100,9 +100,8 @@ export default function BlogPost() {
       '@type': 'Organization',
       name: 'ClawMore',
     },
-    image:
-      'https://clawmore.getaiready.dev/blog-assets/the-reflector-self-critique.png',
-    url: 'https://clawmore.getaiready.dev/blog-assets/the-reflector-self-critique',
+    image: '/blog-assets/the-reflector-self-critique.png',
+    url: '/blog-assets/the-reflector-self-critique',
   };
 
   return (
