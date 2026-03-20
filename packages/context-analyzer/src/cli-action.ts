@@ -7,11 +7,9 @@ import {
 } from '@aiready/core';
 import { analyzeContext } from './analyzer';
 import { generateSummary } from './summary';
-import {
-  displayConsoleReport,
-  generateHTMLReport,
-  runInteractiveSetup,
-} from './utils/output-formatter';
+import { displayConsoleReport } from './report/console-report';
+import { generateHTMLReport } from './report/html-report';
+import { runInteractiveSetup } from './report/interactive-setup';
 import chalk from 'chalk';
 import { writeFileSync } from 'fs';
 

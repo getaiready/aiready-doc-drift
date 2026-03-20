@@ -6,11 +6,9 @@ import {
   getTransitiveDependenciesFromEdges,
 } from './utils/dependency-graph-utils';
 import type { DependencyGraph, DependencyNode } from './types';
-import {
-  buildCoUsageMatrix,
-  buildTypeGraph,
-  inferDomainFromSemantics,
-} from './semantic-analysis';
+import { buildCoUsageMatrix } from './semantic/co-usage';
+import { buildTypeGraph } from './semantic/type-graph';
+import { inferDomainFromSemantics } from './semantic/domain-inference';
 import { extractExportsWithAST } from './ast-utils';
 import { join, dirname, normalize } from 'path';
 

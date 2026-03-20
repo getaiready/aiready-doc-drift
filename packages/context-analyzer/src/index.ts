@@ -14,6 +14,19 @@ export * from './scoring';
 export * from './defaults';
 export * from './summary';
 export * from './types';
-export * from './semantic-analysis';
+// Semantic analysis modules - direct exports
+export * from './semantic/co-usage';
+export * from './semantic/type-graph';
+export * from './semantic/domain-inference';
+export * from './semantic/consolidation';
+
+// Classification modules
+export * from './classify/classification-patterns';
+export * from './classify/file-classifiers';
+
+// Report modules
+export * from './report/console-report';
+export * from './report/html-report';
+export * from './report/interactive-setup';
+
 export { ContextAnalyzerProvider };
-export * from './utils/output-formatter';

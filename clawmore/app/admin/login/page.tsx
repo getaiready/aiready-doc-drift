@@ -7,8 +7,10 @@ import Image from 'next/image';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +36,27 @@ export default function LoginPage() {
     }
   };
 
+  const handleMagicLink = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const res = await signIn('email', { email, redirect: false });
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setMagicLinkSent(true);
+      }
+    } catch (err) {
+      setError('Failed to send magic link');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
       <div className="max-w-md w-full glass-card p-10 border-cyber-blue/30 shadow-[0_0_100px_rgba(0,224,255,0.1)]">
@@ -53,35 +76,100 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-2 ml-1">
-              Secret Key
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-4 text-white placeholder:text-white/10 focus:outline-none focus:border-cyber-blue transition-colors text-center tracking-[0.5em]"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-sm bg-cyber-blue text-black font-black uppercase tracking-widest hover:bg-cyber-blue/90 transition-all shadow-[0_0_30px_rgba(0,224,255,0.2)]"
-          >
-            {loading ? 'Verifying...' : 'Authenticate'}
-          </button>
-
-          {error && (
-            <p className="text-red-400 text-xs text-center font-mono">
-              [ERROR]: {error}
+        {magicLinkSent ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-cyber-blue/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-cyber-blue/40">
+              <svg
+                className="w-8 h-8 text-cyber-blue"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">
+              Check your email
+            </h2>
+            <p className="text-zinc-400 text-sm font-mono">
+              A magic link has been sent to{' '}
+              <span className="text-cyber-blue">{email}</span>.
             </p>
-          )}
-        </form>
+            <button
+              onClick={() => setMagicLinkSent(false)}
+              className="mt-8 text-[10px] text-zinc-500 hover:text-white uppercase tracking-widest transition-colors"
+            >
+              Back to login
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-2 ml-1">
+                Admin Email (Magic Link)
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@getaiready.dev"
+                className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-4 text-white placeholder:text-white/10 focus:outline-none focus:border-cyber-blue transition-colors text-center"
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleMagicLink}
+              className="w-full py-4 rounded-sm bg-white/5 text-cyber-blue border border-cyber-blue/30 font-black uppercase tracking-widest hover:bg-cyber-blue/10 transition-all"
+            >
+              {loading ? 'Processing...' : 'Send Magic Link'}
+            </button>
+
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/5"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] font-mono uppercase tracking-widest">
+                <span className="bg-[#0a0a0a] px-4 text-zinc-700">
+                  Or Secret Key
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-2 ml-1">
+                Secret Key
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-4 text-white placeholder:text-white/10 focus:outline-none focus:border-cyber-blue transition-colors text-center tracking-[0.5em]"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-sm bg-cyber-blue text-black font-black uppercase tracking-widest hover:bg-cyber-blue/90 transition-all shadow-[0_0_30px_rgba(0,224,255,0.2)]"
+            >
+              {loading ? 'Verifying...' : 'Authenticate'}
+            </button>
+
+            {error && (
+              <p className="text-red-400 text-xs text-center font-mono">
+                [ERROR]: {error}
+              </p>
+            )}
+          </form>
+        )}
 
         <div className="mt-8">
           <div className="relative">

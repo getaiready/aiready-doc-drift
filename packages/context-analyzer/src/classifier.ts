@@ -12,7 +12,7 @@ import {
   isUtilityModule,
   isConfigFile,
   isHubAndSpokeFile,
-} from './heuristics';
+} from './classify/file-classifiers';
 
 /**
  * Constants for file classifications to avoid magic strings

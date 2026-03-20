@@ -1,6 +1,6 @@
 import { parseFileExports } from '@aiready/core';
 import type { ExportInfo } from './types';
-import { inferDomain, extractExports } from './semantic-analysis';
+import { inferDomain, extractExports } from './semantic/domain-inference';
 
 /**
  * Extract exports using high-fidelity AST parsing across 5+ languages.
