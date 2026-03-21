@@ -1,8 +1,15 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-01-27-acacia' as any,
-});
+let stripeClient: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_dummy_123', {
+      apiVersion: '2025-01-27-acacia' as any,
+    });
+  }
+  return stripeClient;
+}
 
 /**
  * Creates a Stripe Checkout Session for the $29.00/mo Platform Subscription.
@@ -31,7 +38,7 @@ export async function createPlatformSubscriptionSession(
     cancelUrl,
   } = opts;
 
-  return await stripe.checkout.sessions.create({
+  return await getStripe().checkout.sessions.create({
     customer: customerId,
     customer_email: customerId ? undefined : userEmail,
     payment_method_types: ['card'],
@@ -77,7 +84,7 @@ export async function reportMeteredUsage(
   quantity: number = 1
 ) {
   try {
-    await (stripe.subscriptionItems as any).createUsageRecord(
+    await (getStripe().subscriptionItems as any).createUsageRecord(
       subscriptionItemId,
       {
         quantity,
@@ -103,7 +110,7 @@ export async function reportOverageCharge(
   description: string
 ) {
   try {
-    await stripe.invoiceItems.create({
+    await getStripe().invoiceItems.create({
       customer: customerId,
       amount: amountInCents,
       currency: 'usd',
@@ -126,7 +133,7 @@ export async function createFuelPackCheckout(
   successUrl: string,
   cancelUrl: string
 ) {
-  return await stripe.checkout.sessions.create({
+  return await getStripe().checkout.sessions.create({
     customer: customerId,
     payment_method_types: ['card'],
     line_items: [
