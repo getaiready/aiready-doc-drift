@@ -127,6 +127,16 @@ import EclawnomyPart3 from './eclawnomy-part-3';
 import eclawnomyPart3Meta from './eclawnomy-part-3.meta';
 import EclawnomyPart4 from './eclawnomy-part-4';
 import eclawnomyPart4Meta from './eclawnomy-part-4.meta';
+import TheTokenTax from './the-token-tax';
+import theTokenTaxMeta from './the-token-tax.meta';
+import The9Metrics from './the-9-metrics';
+import the9MetricsMeta from './the-9-metrics.meta';
+import LivingDocumentation from './living-documentation';
+import livingDocumentationMeta from './living-documentation.meta';
+import ArchitectingForAgents from './architecting-for-agents';
+import architectingForAgentsMeta from './architecting-for-agents.meta';
+import TheReadinessScorecard from './the-readiness-scorecard';
+import readinessScorecardMeta from './readiness-scorecard.meta';
 
 /**
  * Static posts array for static generation.
@@ -194,4 +204,9 @@ export const posts = [
   createPostEntry(eclawnomyPart2Meta, EclawnomyPart2),
   createPostEntry(eclawnomyPart3Meta, EclawnomyPart3),
   createPostEntry(eclawnomyPart4Meta, EclawnomyPart4),
+  createPostEntry(theTokenTaxMeta, TheTokenTax),
+  createPostEntry(the9MetricsMeta, The9Metrics),
+  createPostEntry(livingDocumentationMeta, LivingDocumentation),
+  createPostEntry(architectingForAgentsMeta, ArchitectingForAgents),
+  createPostEntry(readinessScorecardMeta, TheReadinessScorecard),
 ];
