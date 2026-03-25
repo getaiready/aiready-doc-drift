@@ -13,8 +13,8 @@ const meta = {
     'Autonomous Engineers',
   ],
   readingTime: '8 min read',
-  cover: '/series-1-the-ai-code-debt-tsunami.png',
-  ogImage: '/series-1-the-ai-code-debt-tsunami.png',
+  cover: '/the-token-tax-cover.png',
+  ogImage: '/the-token-tax-cover.png',
 };
 
 export default meta;

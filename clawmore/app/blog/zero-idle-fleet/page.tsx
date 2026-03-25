@@ -73,7 +73,7 @@ export default function BlogPost() {
       '@type': 'Person',
       name: 'Eclawnomist',
     },
-    image: '/blog-assets/zero-idle-scaling.png',
+    image: '/blog-assets/zero-idle-fleet.png',
     url: '/blog/zero-idle-fleet',
   };
 
@@ -113,7 +113,7 @@ export default function BlogPost() {
 
             <div className="mt-12 relative aspect-[21/9] w-full overflow-hidden border border-white/10 rounded-sm group">
               <img
-                src="/blog-assets/zero-idle-scaling.png"
+                src="/blog-assets/zero-idle-fleet.png"
                 alt="Zero-Idle Fleet"
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
               />

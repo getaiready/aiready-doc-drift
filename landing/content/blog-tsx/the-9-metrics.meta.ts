@@ -13,8 +13,8 @@ const meta = {
     'Engineering Excellence',
   ],
   readingTime: '10 min read',
-  cover: '/series-3-metrics-that-matters.png',
-  ogImage: '/series-3-metrics-that-matters.png',
+  cover: '/the-9-metrics-cover.png',
+  ogImage: '/the-9-metrics-cover.png',
 };
 
 export default meta;

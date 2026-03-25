@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Clock, Hash, ChevronRight, DollarSign, Cpu, Users, Zap } from 'lucide-react';
+import {
+  Clock,
+  Hash,
+  ChevronRight,
+  DollarSign,
+  Cpu,
+  Users,
+  Zap,
+} from 'lucide-react';
 import Modal from '../../../components/Modal';
 import LeadForm from '../../../components/LeadForm';
 import SystemFlow from '../../../components/SystemFlow';
@@ -107,12 +115,13 @@ export default function BlogPost() {
             </h1>
 
             <p className="text-xl text-zinc-200 font-light leading-relaxed italic">
-              Empowering the "Rest of Us." How local firms are leveraging the Eclawnomy to build global-scale engineering capacity.
+              Empowering the "Rest of Us." How local firms are leveraging the
+              Eclawnomy to build global-scale engineering capacity.
             </p>
 
             <div className="mt-12 relative aspect-[21/9] w-full overflow-hidden border border-white/10 rounded-sm group">
               <img
-                src="/blog-assets/one-dollar-ai-agent.png"
+                src="/blog-assets/mutation-001-smb-swarm.png"
                 alt="Mutation #001: The SMB Agentic Swarm"
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
               />
@@ -138,39 +147,65 @@ export default function BlogPost() {
               <div className="space-y-12">
                 <section>
                   <h2 className="text-3xl font-black tracking-tight mb-6 flex items-center gap-4">
-                    <span className="text-cyber-purple font-mono text-sm">01</span>
+                    <span className="text-cyber-purple font-mono text-sm">
+                      01
+                    </span>
                     The Knowledge Barrier
                   </h2>
                   <p className="text-zinc-200 leading-relaxed text-lg">
-                    In the prompt era, AI was a luxury for those who could afford to hire $300k/year engineers to manage it. Small and medium businesses (SMBs) were left behind, stuck in a world of manual spreadsheets and expensive SaaS subscriptions.
+                    In the prompt era, AI was a luxury for those who could
+                    afford to hire $300k/year engineers to manage it. Small and
+                    medium businesses (SMBs) were left behind, stuck in a world
+                    of manual spreadsheets and expensive SaaS subscriptions.
                   </p>
                   <p className="text-zinc-200 leading-relaxed text-lg mt-6">
-                    <strong>ClawMore changes that.</strong> We've removed the technical team requirement. You don't need a DevOps engineer; you need a <strong>Goal</strong>.
+                    <strong>ClawMore changes that.</strong> We've removed the
+                    technical team requirement. You don't need a DevOps
+                    engineer; you need a <strong>Goal</strong>.
                   </p>
                 </section>
 
                 <section>
                   <h2 className="text-3xl font-black tracking-tight mb-6 flex items-center gap-4">
-                    <span className="text-cyber-purple font-mono text-sm">02</span>
+                    <span className="text-cyber-purple font-mono text-sm">
+                      02
+                    </span>
                     The $1.00 Refactor
                   </h2>
                   <p className="text-zinc-200 leading-relaxed text-lg">
-                    Consider our first tracked mutation: A legacy accounting module in a small construction firm. It was slow, prone to errors, and haven't been touched in three years. 
+                    Consider our first tracked mutation: A legacy accounting
+                    module in a small construction firm. It was slow, prone to
+                    errors, and haven't been touched in three years.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-8">
                     <div className="p-6 bg-zinc-900/50 border border-white/5 rounded-sm">
-                      <div className="text-[10px] font-mono text-zinc-500 mb-2">BEFORE_MUTATION</div>
-                      <div className="text-red-500 text-sm font-bold">$XXX/mo Tech Team</div>
-                      <div className="text-red-500 text-sm font-bold">Manual Audits</div>
+                      <div className="text-[10px] font-mono text-zinc-500 mb-2">
+                        BEFORE_MUTATION
+                      </div>
+                      <div className="text-red-500 text-sm font-bold">
+                        $XXX/mo Tech Team
+                      </div>
+                      <div className="text-red-500 text-sm font-bold">
+                        Manual Audits
+                      </div>
                     </div>
                     <div className="p-6 bg-cyber-purple/5 border border-cyber-purple/20 rounded-sm">
-                      <div className="text-[10px] font-mono text-cyber-purple mb-2">AFTER_MUTATION</div>
-                      <div className="text-cyber-purple text-sm font-bold">$1.00 Platform Fee</div>
-                      <div className="text-cyber-purple text-sm font-bold">Autonomous Validation</div>
+                      <div className="text-[10px] font-mono text-cyber-purple mb-2">
+                        AFTER_MUTATION
+                      </div>
+                      <div className="text-cyber-purple text-sm font-bold">
+                        $1.00 Platform Fee
+                      </div>
+                      <div className="text-cyber-purple text-sm font-bold">
+                        Autonomous Validation
+                      </div>
                     </div>
                   </div>
                   <p className="text-zinc-200 leading-relaxed text-lg">
-                    Our agent identified the inefficiency, mutated the code to use a serverless architecture, and validated the fix via E2E tests. Total cost: <strong>$1.00</strong>. No humans required.
+                    Our agent identified the inefficiency, mutated the code to
+                    use a serverless architecture, and validated the fix via E2E
+                    tests. Total cost: <strong>$1.00</strong>. No humans
+                    required.
                   </p>
                 </section>
 
@@ -182,11 +217,16 @@ export default function BlogPost() {
 
                 <section>
                   <h2 className="text-3xl font-black tracking-tight mb-6 flex items-center gap-4">
-                    <span className="text-cyber-purple font-mono text-sm">03</span>
+                    <span className="text-cyber-purple font-mono text-sm">
+                      03
+                    </span>
                     Joining the Eclawnomy
                   </h2>
                   <p className="text-zinc-200 leading-relaxed text-lg">
-                    The secret sauce isn't just the agent—it's the <strong>Eclawnomy Ecosystem</strong>. When you join the Hub, your specific optimizations (like the construction firm's accounting fix) are harvested as anonymous patterns. 
+                    The secret sauce isn't just the agent—it's the{' '}
+                    <strong>Eclawnomy Ecosystem</strong>. When you join the Hub,
+                    your specific optimizations (like the construction firm's
+                    accounting fix) are harvested as anonymous patterns.
                   </p>
                   <div className="mt-8 p-6 bg-zinc-900/50 border border-white/10 rounded-sm font-mono text-[11px] text-zinc-200">
                     <div className="flex items-center gap-2 text-cyber-purple mb-2">
@@ -202,17 +242,22 @@ export default function BlogPost() {
 }`}
                   </div>
                   <p className="text-zinc-200 leading-relaxed text-lg mt-6">
-                    By contributing to the collective intelligence, the firm's $1.00 fee was waived. They evolved their business for free while helping the entire network get smarter.
+                    By contributing to the collective intelligence, the firm's
+                    $1.00 fee was waived. They evolved their business for free
+                    while helping the entire network get smarter.
                   </p>
                 </section>
 
                 <section>
                   <h2 className="text-3xl font-black tracking-tight mb-6 flex items-center gap-4">
-                    <span className="text-cyber-purple font-mono text-sm">04</span>
+                    <span className="text-cyber-purple font-mono text-sm">
+                      04
+                    </span>
                     The Department Claws
                   </h2>
                   <p className="text-zinc-200 leading-relaxed text-lg">
-                    This is just the beginning. Our vision is a self-managed workspace where you command your own departments:
+                    This is just the beginning. Our vision is a self-managed
+                    workspace where you command your own departments:
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
                     {[
@@ -223,11 +268,16 @@ export default function BlogPost() {
                       { icon: <Cpu />, label: 'DEVOPS' },
                       { icon: <ChevronRight />, label: 'LAW' },
                     ].map((dept, idx) => (
-                      <div key={idx} className="p-4 border border-white/5 bg-white/[0.02] flex flex-col items-center gap-2 group hover:border-cyber-purple/30 transition-all">
+                      <div
+                        key={idx}
+                        className="p-4 border border-white/5 bg-white/[0.02] flex flex-col items-center gap-2 group hover:border-cyber-purple/30 transition-all"
+                      >
                         <div className="text-zinc-500 group-hover:text-cyber-purple transition-colors">
                           {dept.icon}
                         </div>
-                        <div className="text-[10px] font-mono font-black tracking-widest">{dept.label}</div>
+                        <div className="text-[10px] font-mono font-black tracking-widest">
+                          {dept.label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -238,10 +288,7 @@ export default function BlogPost() {
                 <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.4em] mb-8">
                   Up_Next_In_The_Mutation_Diaries
                 </div>
-                <Link
-                  href="/blog/zero-idle-scaling"
-                  className="block group"
-                >
+                <Link href="/blog/zero-idle-scaling" className="block group">
                   <div className="glass-card p-8 flex items-center justify-between hover:border-cyber-purple/30 transition-all bg-white/[0.01]">
                     <div className="flex items-center gap-6">
                       <div className="w-12 h-12 rounded-sm bg-cyber-purple/10 flex items-center justify-center text-cyber-purple border border-cyber-purple/20">

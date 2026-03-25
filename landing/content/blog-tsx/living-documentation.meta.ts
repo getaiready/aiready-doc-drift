@@ -14,8 +14,8 @@ const meta = {
     'Agentic Workflow',
   ],
   readingTime: '9 min read',
-  cover: '/series-2-invisible-to-ai.png',
-  ogImage: '/series-2-invisible-to-ai.png',
+  cover: '/living-documentation-cover.png',
+  ogImage: '/living-documentation-cover.png',
 };
 
 export default meta;

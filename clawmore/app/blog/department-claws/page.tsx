@@ -35,7 +35,7 @@ export default function BlogPost() {
       '@type': 'Person',
       name: 'Eclawnomist',
     },
-    image: '/blog-assets/safety-isolation.png',
+    image: '/blog-assets/department-claws.png',
     url: '/blog/department-claws',
   };
 
@@ -108,7 +108,7 @@ export default function BlogPost() {
 
             <div className="mt-12 relative aspect-[21/9] w-full overflow-hidden border border-white/10 rounded-sm group">
               <img
-                src="/blog-assets/safety-isolation.png"
+                src="/blog-assets/department-claws.png"
                 alt="Department Claws"
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
               />

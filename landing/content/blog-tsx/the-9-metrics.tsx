@@ -12,7 +12,7 @@ const Post = () => (
 
     <div className="my-8 max-w-4xl mx-auto">
       <img
-        src="/series-3-metrics-that-matters.png"
+        src="/the-9-metrics-cover.png"
         alt="The 9 Metrics - cover"
         className="w-full rounded-3xl shadow-2xl border border-slate-200 dark:border-zinc-800"
       />

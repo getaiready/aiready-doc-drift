@@ -7,8 +7,8 @@ const meta = {
   author: 'Peng Cao',
   tags: ['AI-Ready', 'ROI', 'Strategy', 'Agentic Velocity', 'Scorecard'],
   readingTime: '9 min read',
-  cover: '/series-6-visualise-invisible-debt.png',
-  ogImage: '/series-6-visualise-invisible-debt.png',
+  cover: '/readiness-scorecard-cover.png',
+  ogImage: '/readiness-scorecard-cover.png',
 };
 
 export default meta;

@@ -14,8 +14,8 @@ const meta = {
     'DevOps',
   ],
   readingTime: '8 min read',
-  cover: '/series-4-semantic-duplicate-detection.png',
-  ogImage: '/series-4-semantic-duplicate-detection.png',
+  cover: '/architecting-for-agents-cover.png',
+  ogImage: '/architecting-for-agents-cover.png',
 };
 
 export default meta;
