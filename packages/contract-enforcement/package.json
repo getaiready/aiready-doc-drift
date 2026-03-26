@@ -1,6 +1,6 @@
 {
   "name": "@aiready/contract-enforcement",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Measures structural contract enforcement to reduce defensive coding cascades",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
