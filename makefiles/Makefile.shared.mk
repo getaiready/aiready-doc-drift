@@ -36,11 +36,11 @@ SPOKE_DIR = $(if $(wildcard packages/$(1)),packages/$(1),$(1))
 # This ensures new packages require explicit opt-in before being mirrored/published.
 
 # Spokes that have public GitHub mirrors via subtree split
-PUBLIC_GITHUB_SPOKES := agent-grounding ai-signal-clarity change-amplification cli components consistency context-analyzer core deps doc-drift mcp-server pattern-detect testability visualizer
+PUBLIC_GITHUB_SPOKES := agent-grounding ai-signal-clarity change-amplification cli components consistency context-analyzer contract-enforcement core deps doc-drift mcp-server pattern-detect testability visualizer
 
 # Spokes that are published to npm registry
 # Note: skills is excluded (published via Paks/Smithery, not npm)
-NPM_PUBLISH_SPOKES := agent-grounding consistency context-analyzer core deps doc-drift pattern-detect testability visualizer cli
+NPM_PUBLISH_SPOKES := agent-grounding ai-signal-clarity change-amplification cli consistency context-analyzer contract-enforcement core deps doc-drift pattern-detect testability visualizer
 
 # Resolve root directory relative to this file
 ROOT_DIR ?= $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)

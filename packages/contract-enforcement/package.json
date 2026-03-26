@@ -1,7 +1,7 @@
 {
   "name": "@aiready/contract-enforcement",
   "version": "0.2.0",
-  "description": "Measures structural contract enforcement to reduce defensive coding cascades",
+  "description": "Measures structural type safety and boundary validation to reduce fallback cascades for AI agents",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -17,8 +17,28 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "test": "vitest run",
     "lint": "eslint src",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm build",
+    "release": "pnpm build && pnpm publish --no-git-checks"
   },
+  "keywords": [
+    "aiready",
+    "contract-enforcement",
+    "type-safety",
+    "static-analysis",
+    "ai-ready",
+    "typescript",
+    "structural-contracts",
+    "defensive-coding",
+    "error-handling"
+  ],
+  "author": "AIReady Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caopengau/aiready-contract-enforcement.git"
+  },
+  "homepage": "https://github.com/caopengau/aiready-contract-enforcement",
   "dependencies": {
     "@aiready/core": "workspace:*",
     "@typescript-eslint/typescript-estree": "^8.53.0"

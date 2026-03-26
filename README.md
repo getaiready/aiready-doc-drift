@@ -40,16 +40,21 @@ Mixed-language projects are fully supported - the tool automatically detects and
 
 - **[@aiready/cli](https://www.npmjs.com/package/@aiready/cli)** [![npm](https://img.shields.io/npm/v/@aiready/cli)](https://www.npmjs.com/package/@aiready/cli) - Unified CLI interface for running all analysis tools together or individually
 - **[@aiready/pattern-detect](https://www.npmjs.com/package/@aiready/pattern-detect)** [![npm](https://img.shields.io/npm/v/@aiready/pattern-detect)](https://www.npmjs.com/package/@aiready/pattern-detect) - Detect semantic duplicate patterns that waste AI context window tokens
-- **[@aiready/context-analyzer](https://www.npmjs.com/package/@aiready/context-analyzer)** [![npm](https://img.shields.io/npm/v/@aiready/context-analyzer)](https://www.npmjs.com/package/@aiready/context-analyzer) - Analyze context window costs, import depth, cohesion, and fragmentation. Includes structural (co-usage) cohesion signal with configurable weights (import: 0.5, structural: 0.3, domain: 0.2)
+- **[@aiready/context-analyzer](https://www.npmjs.com/package/@aiready/context-analyzer)** [![npm](https://img.shields.io/npm/v/@aiready/context-analyzer)](https://www.npmjs.com/package/@aiready/context-analyzer) - Analyze context window costs, import depth, cohesion, and fragmentation
 - **[@aiready/consistency](https://www.npmjs.com/package/@aiready/consistency)** [![npm](https://img.shields.io/npm/v/@aiready/consistency)](https://www.npmjs.com/package/@aiready/consistency) - Check naming conventions and pattern consistency across your codebase
-- **[@aiready/visualizer](https://www.npmjs.com/package/@aiready/visualizer)** [![npm](https://img.shields.io/npm/v/@aiready/visualizer)](https://www.npmjs.com/package/@aiready/visualizer) - Interactive force-directed graph visualization of analysis results; generates standalone HTML reports and includes a React/D3 web app
-- **[@aiready/components](https://www.npmjs.com/package/@aiready/components)** [![npm](https://img.shields.io/npm/v/@aiready/components)](https://www.npmjs.com/package/@aiready/components) - Shared UI component library (shadcn/ui based), D3 charts (ForceDirectedGraph), React hooks, and utilities used across AIReady tools
+- **[@aiready/contract-enforcement](https://www.npmjs.com/package/@aiready/contract-enforcement)** [![npm](https://img.shields.io/npm/v/@aiready/contract-enforcement)](https://www.npmjs.com/package/@aiready/contract-enforcement) - Measure structural type safety and boundary validation to reduce fallback cascades
+- **[@aiready/ai-signal-clarity](https://www.npmjs.com/package/@aiready/ai-signal-clarity)** [![npm](https://img.shields.io/npm/v/@aiready/ai-signal-clarity)](https://www.npmjs.com/package/@aiready/ai-signal-clarity) - Detect hallucination-risk patterns like boolean traps and large file noise
+- **[@aiready/change-amplification](https://www.npmjs.com/package/@aiready/change-amplification)** [![npm](https://img.shields.io/npm/v/@aiready/change-amplification)](https://www.npmjs.com/package/@aiready/change-amplification) - Analyze betweenness centrality and fan-out to assess ripple effect risks
+- **[@aiready/agent-grounding](https://www.npmjs.com/package/@aiready/agent-grounding)** [![npm](https://img.shields.io/npm/v/@aiready/agent-grounding)](https://www.npmjs.com/package/@aiready/agent-grounding) - Evaluate how well codebase structure and docs aid AI agent reasoning
+- **[@aiready/testability](https://www.npmjs.com/package/@aiready/testability)** [![npm](https://img.shields.io/npm/v/@aiready/testability)](https://www.npmjs.com/package/@aiready/testability) - Analyze verify-loop friction and side-effect density for autonomous agents
 - **[@aiready/doc-drift](https://www.npmjs.com/package/@aiready/doc-drift)** [![npm](https://img.shields.io/npm/v/@aiready/doc-drift)](https://www.npmjs.com/package/@aiready/doc-drift) - Track documentation freshness vs code churn to identify outdated docs
 - **[@aiready/deps](https://www.npmjs.com/package/@aiready/deps)** [![npm](https://img.shields.io/npm/v/@aiready/deps)](https://www.npmjs.com/package/@aiready/deps) - Analyze dependency health and detect skew against AI training-cutoff dates
+- **[@aiready/visualizer](https://www.npmjs.com/package/@aiready/visualizer)** [![npm](https://img.shields.io/npm/v/@aiready/visualizer)](https://www.npmjs.com/package/@aiready/visualizer) - Interactive force-directed graph visualization of analysis results
+- **[@aiready/components](https://www.npmjs.com/package/@aiready/components)** [![npm](https://img.shields.io/npm/v/@aiready/components)](https://www.npmjs.com/package/@aiready/components) - Shared UI component library (shadcn/ui based) and D3 charts
 
-### Coming Soon
+### Platform (Private SaaS)
 
-- **change-amplification** - Analyze betweenness centrality and fan-out to assess rippling changes.
+- **[@aiready/agents](https://www.npmjs.com/package/@aiready/agents)** - Agent orchestration and task execution layer
 
 ## 🏗️ Architecture
 
@@ -79,28 +84,28 @@ AIReady uses a **hub-and-spoke architecture** for modularity and extensibility:
    │ • HTML reports│                       │             │
    │ ✅ Ready     │                         └──────┬──────┘
    └──────┬──────┘                                │
-          │                    ┌──────────────────┼──────────────────┐
-          │                    │                  │                  │
-          │                    ▼                  ▼                  ▼
-          │              ┌──────────┐       ┌──────────┐       ┌──────────┐
-          │              │📊 PATTERN│       │🧠 CONTEXT│       │🔧 CONSIST│
-          │              │  DETECT  │       │ ANALYZER │       │  ENCY    │
-          │              │          │       │          │       │          │
-          │              │• Semantic│       │• Context │       │• Naming  │
-          │              │  dupes   │       │  budgets │       │  rules   │
-          │              │✅ Ready  │       │✅ Ready  │       │✅ Ready  │
-          │              └─────┬────┘       └─────┬────┘       └─────┬────┘
-          │                    │                  │                  │
-          │              ┌─────┴────┐       ┌─────┴────┐             │
-          │              │📝 DOC    │       │📦 DEPS   │             │
-          │              │  DRIFT   │       │          │             │
-          │              │          │       │          │             │
-          │              │• Outdated│       │• Health  │             │
-          │              │  docs    │       │  & Skew  │             │
-          │              │✅ Ready  │       │✅ Ready  │             │
-          │              └──────────┘       └──────────┘             │
-          │                    │                  │                  │
-          └────────────────────┴──────────────────┴──────────────────┘
+          │         ┌────────────┬────────────┬───┴───┬────────────┬────────────┐
+          │         │            │            │       │            │            │
+          │         ▼            ▼            ▼       ▼            ▼            ▼
+          │   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+          │   │📊 PATTERN│ │🧠 CONTEXT│ │🔧 CONSIST│ │📝 DOC    │ │📦 DEPS   │ │🛡️ CONTRACT│
+          │   │  DETECT  │ │ ANALYZER │ │  ENCY    │ │  DRIFT   │ │  HEALTH  │ │ ENFORCE  │
+          │   │          │ │          │ │          │ │          │ │          │ │          │
+          │   │• Semantic│ │• Context │ │• Naming  │ │• Outdated│ │• Health  │ │• Type    │
+          │   │  dupes   │ │  budgets │ │  rules   │ │  docs    │ │  & Skew  │ │  safety  │
+          │   │✅ Ready  │ │✅ Ready  │ │✅ Ready  │ │✅ Ready  │ │✅ Ready  │ │✅ Ready  │
+          │   └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘ └─────┬────┘
+          │         │            │            │            │            │            │
+          │   ┌─────┴────┐ ┌─────┴────┐ ┌─────┴────┐ ┌─────┴────┐ ┌─────┴────┐       │
+          │   │🚀 CHANGE │ │🔍 SIGNAL │ │🤖 AGENT  │ │🧪 TEST   │ │...MORE   │       │
+          │   │  AMPLIF  │ │  CLARITY │ │ GROUNDING│ │ ABILITY  │ │  SPOKES  │       │
+          │   │          │ │          │ │          │ │          │ │          │       │
+          │   │• Ripple  │ │• Hallucin│ │• Domain   │ │• Verify  │ │          │       │
+          │   │  effect  │ │  risk    │ │  context  │ │  loop    │ │          │       │
+          │   │✅ Ready  │ │✅ Ready  │ │✅ Ready  │ │✅ Ready  │ │          │       │
+          │   └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+          │                                                                          │
+          └──────────────────────────────────────────────────────────────────────────┘
                                    │
                                    ▼
                     ┌─────────────────────────────────┐
@@ -201,7 +206,7 @@ aiready upload .aiready/latest.json --api-key ar_...
 
 ## 📊 AI Readiness Scoring
 
-Get a unified **0-100 score** that quantifies how well your codebase works with AI coding assistants:
+Get a unified **0-100 score** that quantifies how well your codebase works with AI coding assistants across 10 key dimensions:
 
 ```bash
 aiready scan . --score
@@ -210,14 +215,12 @@ aiready scan . --score
 **Example Output:**
 
 ```
-🎯 AI Readiness Score: 65/100 (Fair)
+🎯 AI Readiness Score: 78/100 (Good)
 
-📊 Breakdown:
-  • Pattern Detection:    66/100  (40% weight)
-  • Context Analysis:     52/100  (35% weight)
-  • Consistency:          80/100  (25% weight)
-
-Calculation: (66×40 + 52×35 + 80×25) / 100 = 65
+📊 Breakdown (Top 3):
+  • Consistency:          85/100  (High leverage)
+  • Contract Enforcement: 72/100  (New!)
+  • Pattern Detection:    66/100  (Standard)
 ```
 
 ### Rating Scale

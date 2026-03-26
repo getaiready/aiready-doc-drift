@@ -179,6 +179,9 @@ publish-skills: ## Publish @aiready/skills to GitHub (shortcut for: make publish
 publish-mcp-server: ## Publish @aiready/mcp-server to GitHub
 	@$(MAKE) publish SPOKE=mcp-server OWNER=$(OWNER)
 
+publish-contract-enforcement: ## Publish @aiready/contract-enforcement to GitHub
+	@$(MAKE) publish SPOKE=contract-enforcement OWNER=$(OWNER)
+
 npm-publish-core: ## Publish @aiready/core to npm (shortcut for: make npm-publish SPOKE=core)
 	@$(MAKE) npm-publish SPOKE=core OTP=$(OTP)
 
@@ -208,6 +211,15 @@ npm-publish-testability: ## Publish @aiready/testability to npm
 npm-publish-agent-grounding: ## Publish @aiready/agent-grounding to npm
 	@$(MAKE) npm-publish SPOKE=agent-grounding OTP=$(OTP)
 
+npm-publish-ai-signal-clarity: ## Publish @aiready/ai-signal-clarity to npm
+	@$(MAKE) npm-publish SPOKE=ai-signal-clarity OTP=$(OTP)
+
+npm-publish-change-amplification: ## Publish @aiready/change-amplification to npm
+	@$(MAKE) npm-publish SPOKE=change-amplification OTP=$(OTP)
+
+npm-publish-contract-enforcement: ## Publish @aiready/contract-enforcement to npm
+	@$(MAKE) npm-publish SPOKE=contract-enforcement OTP=$(OTP)
+
 npm-publish-visualizer: ## Publish @aiready/visualizer to npm
 	@$(MAKE) npm-publish SPOKE=visualizer OTP=$(OTP)
 
@@ -215,7 +227,8 @@ npm-publish-visualizer: ## Publish @aiready/visualizer to npm
 
 npm-publish-all: build npm-publish-core npm-publish-pattern-detect npm-publish-context-analyzer npm-publish-cli \
 	npm-publish-consistency npm-publish-doc-drift npm-publish-deps \
-	npm-publish-testability npm-publish-agent-grounding npm-publish-visualizer
+	npm-publish-testability npm-publish-agent-grounding npm-publish-visualizer \
+	npm-publish-ai-signal-clarity npm-publish-change-amplification npm-publish-contract-enforcement
 
 # Sync changes from spoke repos back to monorepo (for external contributions)
 sync-from-spoke: ## Sync changes from spoke repo back to monorepo. Usage: make sync-from-spoke SPOKE=pattern-detect
