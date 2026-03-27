@@ -10,7 +10,11 @@ import {
   seedCircularPositions,
   safelyStopSimulation,
 } from './simulation-helpers';
-import { SIMULATION_DEFAULTS, FORCE_NAMES, EVENT_NAMES } from './simulation-constants';
+import {
+  SIMULATION_DEFAULTS,
+  FORCE_NAMES,
+  EVENT_NAMES,
+} from './simulation-constants';
 import type {
   SimulationNode,
   SimulationLink,
@@ -62,7 +66,10 @@ export function useForceSimulation(
   const [isRunning, setIsRunning] = useState(false);
   const [alpha, setAlpha] = useState(1);
 
-  const simulationRef = useRef<d3.Simulation<SimulationNode, SimulationLink> | null>(null);
+  const simulationRef = useRef<d3.Simulation<
+    SimulationNode,
+    SimulationLink
+  > | null>(null);
   const stopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const forcesEnabledRef = useRef(true);
   const originalForcesRef = useRef({
@@ -74,8 +81,14 @@ export function useForceSimulation(
   const nodesKey = initialNodes.map((n) => n.id).join('|');
   const linksKey = initialLinks
     .map((l) => {
-      const sourceId = typeof l.source === 'string' ? l.source : (l.source as SimulationNode)?.id;
-      const targetId = typeof l.target === 'string' ? l.target : (l.target as SimulationNode)?.id;
+      const sourceId =
+        typeof l.source === 'string'
+          ? l.source
+          : (l.source as SimulationNode)?.id;
+      const targetId =
+        typeof l.target === 'string'
+          ? l.target
+          : (l.target as SimulationNode)?.id;
       const linkType = (l as any).type || '';
       return `${sourceId}->${targetId}:${linkType}`;
     })
@@ -91,11 +104,16 @@ export function useForceSimulation(
     try {
       seedCircularPositions(nodesCopy, width, height);
     } catch (error) {
-      console.warn('AIReady: Position seeding failed, using random fallback:', error);
+      console.warn(
+        'AIReady: Position seeding failed, using random fallback:',
+        error
+      );
       seedRandomPositions(nodesCopy, width, height);
     }
 
-    const simulation = d3.forceSimulation<SimulationNode, SimulationLink>(nodesCopy);
+    const simulation = d3.forceSimulation<SimulationNode, SimulationLink>(
+      nodesCopy
+    );
     applySimulationForces(simulation, linksCopy);
     configureSimulationParameters(simulation);
 
@@ -144,13 +162,25 @@ export function useForceSimulation(
       simulation
         .force(FORCE_NAMES.LINK, linkForce)
         .force(FORCE_NAMES.CHARGE, d3.forceManyBody().strength(chargeStrength))
-        .force(FORCE_NAMES.CENTER, d3.forceCenter(width / 2, height / 2).strength(centerStrength))
+        .force(
+          FORCE_NAMES.CENTER,
+          d3.forceCenter(width / 2, height / 2).strength(centerStrength)
+        )
         .force(
           FORCE_NAMES.COLLISION,
-          d3.forceCollide<SimulationNode>().radius((d) => (d.size ?? 10) + collisionRadius).strength(collisionStrength)
+          d3
+            .forceCollide<SimulationNode>()
+            .radius((d) => (d.size ?? 10) + collisionRadius)
+            .strength(collisionStrength)
         )
-        .force(FORCE_NAMES.X, d3.forceX(width / 2).strength(Math.max(0.02, centerStrength * 0.5)))
-        .force(FORCE_NAMES.Y, d3.forceY(height / 2).strength(Math.max(0.02, centerStrength * 0.5)));
+        .force(
+          FORCE_NAMES.X,
+          d3.forceX(width / 2).strength(Math.max(0.02, centerStrength * 0.5))
+        )
+        .force(
+          FORCE_NAMES.Y,
+          d3.forceY(height / 2).strength(Math.max(0.02, centerStrength * 0.5))
+        );
     } catch (error) {
       console.warn('AIReady: Failed to configure simulation forces:', error);
     }
@@ -159,7 +189,9 @@ export function useForceSimulation(
   /**
    * Configures simulation decay and heat parameters
    */
-  const configureSimulationParameters = (simulation: d3.Simulation<SimulationNode, SimulationLink>) => {
+  const configureSimulationParameters = (
+    simulation: d3.Simulation<SimulationNode, SimulationLink>
+  ) => {
     simulation
       .alphaDecay(alphaDecay)
       .velocityDecay(velocityDecay)
@@ -182,7 +214,9 @@ export function useForceSimulation(
 
     if (maxSimulationTimeMs > 0) {
       stopTimeoutRef.current = setTimeout(() => {
-        safelyStopSimulation(simulation, nodesCopy, { stabilize: stabilizeOnStop });
+        safelyStopSimulation(simulation, nodesCopy, {
+          stabilize: stabilizeOnStop,
+        });
         updateStateAfterStop(nodesCopy, linksCopy, 0);
       }, maxSimulationTimeMs);
     }
@@ -222,7 +256,9 @@ export function useForceSimulation(
 
       const currentAlpha = simulation.alpha();
       if (currentAlpha <= alphaMin) {
-        safelyStopSimulation(simulation, nodesCopy, { stabilize: stabilizeOnStop });
+        safelyStopSimulation(simulation, nodesCopy, {
+          stabilize: stabilizeOnStop,
+        });
         updateStateAfterStop(nodesCopy, linksCopy, currentAlpha);
         return;
       }
@@ -244,7 +280,10 @@ export function useForceSimulation(
     rafState: { rafId: number | null; lastUpdate: number }
   ) => {
     const now = Date.now();
-    if (rafState.rafId === null && now - rafState.lastUpdate >= tickThrottleMs) {
+    if (
+      rafState.rafId === null &&
+      now - rafState.lastUpdate >= tickThrottleMs
+    ) {
       rafState.rafId = requestAnimationFrame(() => {
         rafState.rafId = null;
         rafState.lastUpdate = Date.now();
@@ -305,28 +344,36 @@ export function useForceSimulation(
   /**
    * Enable or disable simulation forces
    */
-  const setForcesEnabled = useCallback((enabled: boolean) => {
-    const sim = simulationRef.current;
-    if (!sim || forcesEnabledRef.current === enabled) return;
-    
-    forcesEnabledRef.current = enabled;
+  const setForcesEnabled = useCallback(
+    (enabled: boolean) => {
+      const sim = simulationRef.current;
+      if (!sim || forcesEnabledRef.current === enabled) return;
 
-    try {
-      const charge = sim.force(FORCE_NAMES.CHARGE) as d3.ForceManyBody<SimulationNode> | null;
-      if (charge) {
-        charge.strength(enabled ? originalForcesRef.current.charge : 0);
-      }
+      forcesEnabledRef.current = enabled;
 
-      const link = sim.force(FORCE_NAMES.LINK) as d3.ForceLink<SimulationNode, SimulationLink> | null;
-      if (link) {
-        link.strength(enabled ? originalForcesRef.current.link : 0);
+      try {
+        const charge = sim.force(
+          FORCE_NAMES.CHARGE
+        ) as d3.ForceManyBody<SimulationNode> | null;
+        if (charge) {
+          charge.strength(enabled ? originalForcesRef.current.charge : 0);
+        }
+
+        const link = sim.force(FORCE_NAMES.LINK) as d3.ForceLink<
+          SimulationNode,
+          SimulationLink
+        > | null;
+        if (link) {
+          link.strength(enabled ? originalForcesRef.current.link : 0);
+        }
+
+        sim.alpha(warmAlpha).restart();
+      } catch (error) {
+        console.warn('AIReady: Failed to toggle simulation forces:', error);
       }
-      
-      sim.alpha(warmAlpha).restart();
-    } catch (error) {
-      console.warn('AIReady: Failed to toggle simulation forces:', error);
-    }
-  }, [warmAlpha]);
+    },
+    [warmAlpha]
+  );
 
   return {
     nodes,
@@ -342,7 +389,9 @@ export function useForceSimulation(
 /**
  * Hook for creating a draggable force simulation
  */
-export function useDrag(simulation: d3.Simulation<SimulationNode, any> | null | undefined) {
+export function useDrag(
+  simulation: d3.Simulation<SimulationNode, any> | null | undefined
+) {
   const handleDragStart = useCallback(
     (event: any, node: SimulationNode) => {
       if (!simulation) return;
