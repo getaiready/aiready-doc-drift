@@ -18,8 +18,10 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           type="checkbox"
           id={checkboxId}
           ref={ref}
+          role="checkbox"
+          aria-checked={props.checked ? 'true' : 'false'}
           className={cn(
-            'h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+            'peer h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
             className
           )}
           {...props}

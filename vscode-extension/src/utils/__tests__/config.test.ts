@@ -18,7 +18,8 @@ describe('Config Utils', () => {
   describe('getMergedConfig', () => {
     it('should return smart defaults when no config is set', () => {
       const mockGet = vi.fn().mockImplementation((key, defaultValue) => defaultValue);
-      (workspace.getConfiguration as any).mockReturnValue({ get: mockGet });
+      const mockInspect = vi.fn().mockReturnValue({ globalValue: undefined, workspaceValue: undefined });
+      (workspace.getConfiguration as any).mockReturnValue({ get: mockGet, inspect: mockInspect });
 
       const config = getMergedConfig();
 
@@ -29,6 +30,7 @@ describe('Config Utils', () => {
       expect(config.autoScan).toBe(SMART_DEFAULTS.autoScan);
       expect(config.showStatusBar).toBe(SMART_DEFAULTS.showStatusBar);
       expect(config.excludePatterns).toEqual([...SMART_DEFAULTS.excludePatterns]);
+      expect(config.overrides?.threshold).toBe(false);
     });
 
     it('should return user config when set', () => {
@@ -44,8 +46,14 @@ describe('Config Utils', () => {
       const mockGet = vi.fn().mockImplementation((key, defaultValue) => {
         return userConfig[key as keyof typeof userConfig] ?? defaultValue;
       });
+      const mockInspect = vi.fn().mockImplementation((key) => {
+        if (key === 'threshold') return { globalValue: 90, workspaceValue: undefined };
+        if (key === 'tools') return { globalValue: undefined, workspaceValue: ['patterns'] };
+        if (key === 'failOn') return { globalValue: 'any', workspaceValue: undefined };
+        return { globalValue: undefined, workspaceValue: undefined };
+      });
       
-      (workspace.getConfiguration as any).mockReturnValue({ get: mockGet });
+      (workspace.getConfiguration as any).mockReturnValue({ get: mockGet, inspect: mockInspect });
 
       const config = getMergedConfig();
 
@@ -55,6 +63,9 @@ describe('Config Utils', () => {
       expect(config.autoScan).toBe(true);
       expect(config.showStatusBar).toBe(false);
       expect(config.excludePatterns).toEqual(['node_modules/**']);
+      expect(config.overrides?.threshold).toBe(true);
+      expect(config.overrides?.tools).toBe(true);
+      expect(config.overrides?.failOn).toBe(true);
     });
 
     it('should handle partial config correctly', () => {
@@ -62,13 +73,19 @@ describe('Config Utils', () => {
         if (key === 'threshold') return 80;
         return defaultValue;
       });
+      const mockInspect = vi.fn().mockImplementation((key) => {
+        if (key === 'threshold') return { globalValue: 80, workspaceValue: undefined };
+        return { globalValue: undefined, workspaceValue: undefined };
+      });
       
-      (workspace.getConfiguration as any).mockReturnValue({ get: mockGet });
+      (workspace.getConfiguration as any).mockReturnValue({ get: mockGet, inspect: mockInspect });
 
       const config = getMergedConfig();
 
       expect(config.threshold).toBe(80);
       expect(config.tools).toEqual([...SMART_DEFAULTS.tools]);
+      expect(config.overrides?.threshold).toBe(true);
+      expect(config.overrides?.tools).toBe(false);
     });
   });
 });
