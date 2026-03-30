@@ -70,7 +70,7 @@ export const CONTEXT_RULES: ContextRule[] = [
 
       return isTemplate && hasTemplateContent;
     },
-    severity: Severity.Minor,
+    severity: Severity.Info,
     reason:
       'Template duplication may be intentional for maintainability and branding consistency',
     suggestion:
@@ -103,7 +103,7 @@ export const CONTEXT_RULES: ContextRule[] = [
 
       return isE2ETest && hasPageObjectPatterns;
     },
-    severity: Severity.Minor,
+    severity: Severity.Info,
     reason:
       'E2E test duplication ensures test independence and reduces coupling',
     suggestion:
@@ -124,14 +124,14 @@ export const CONTEXT_RULES: ContextRule[] = [
         file.includes('tsconfig')
       );
     },
-    severity: Severity.Minor,
+    severity: Severity.Info,
     reason: 'Configuration files often have similar structure by design',
     suggestion:
       'Consider shared config base only if configurations become hard to maintain',
   },
 
   // Type Definitions - Duplication for type safety and module independence
-  // Only apply to .d.ts files or files in /types/ directories, not to all files containing interfaces
+  // Matches type-only files OR interface/type definitions in component files
   {
     name: 'type-definitions',
     detect: (file, code) => {
@@ -148,11 +148,21 @@ export const CONTEXT_RULES: ContextRule[] = [
         !code.includes('let ') &&
         !code.includes('export default');
 
-      return isTypeFile && hasOnlyTypeDefinitions;
+      // Also match interface-only snippets in component files
+      // (e.g., ModalProps, BreadcrumbItem, GraphEdge, ScanIssue)
+      const isInterfaceOnlySnippet =
+        code.trim().startsWith('interface ') &&
+        code.includes('{') &&
+        code.includes('}') &&
+        !code.includes('function ') &&
+        !code.includes('const ') &&
+        !code.includes('return ');
+
+      return (isTypeFile && hasOnlyTypeDefinitions) || isInterfaceOnlySnippet;
     },
     severity: Severity.Info,
     reason:
-      'Type-only files may be intentionally duplicated for module independence',
+      'Type/interface definitions are intentionally duplicated for module independence',
     suggestion:
       'Extract to shared types package only if causing maintenance burden',
   },
@@ -267,7 +277,7 @@ export const CONTEXT_RULES: ContextRule[] = [
 
       return isUtilFile && hasUtilPattern;
     },
-    severity: Severity.Minor,
+    severity: Severity.Info,
     reason:
       'Utility functions in dedicated utility files may be intentionally similar',
     suggestion:
@@ -298,6 +308,105 @@ export const CONTEXT_RULES: ContextRule[] = [
       'Consider extracting common hook logic only if hooks become complex',
   },
 
+  // CLI Command Definitions - Commander.js boilerplate patterns
+  {
+    name: 'cli-command-definitions',
+    detect: (file, code) => {
+      const isCliFile =
+        file.includes('/commands/') ||
+        file.includes('/cli/') ||
+        file.endsWith('.command.ts');
+
+      const hasCommandPattern =
+        (code.includes('.command(') || code.includes('defineCommand')) &&
+        (code.includes('.description(') || code.includes('.option(')) &&
+        (code.includes('.action(') || code.includes('async'));
+
+      return isCliFile && hasCommandPattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'CLI command definitions follow standard Commander.js patterns and are intentionally similar',
+    suggestion:
+      'Command boilerplate duplication is acceptable for CLI interfaces',
+  },
+
+  // Score/Rating Helper Functions - Common threshold patterns
+  {
+    name: 'score-helpers',
+    detect: (file, code) => {
+      const isHelperFile =
+        file.includes('/utils/') ||
+        file.includes('/helpers/') ||
+        file.endsWith('.util.ts');
+
+      const hasScorePattern =
+        (code.includes('if (score >=') || code.includes('if (score >')) &&
+        code.includes('return') &&
+        code.includes("'") &&
+        code.split('if (score').length >= 3; // Multiple score thresholds
+
+      return isHelperFile && hasScorePattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'Score/rating helper functions use common threshold patterns that are intentionally similar',
+    suggestion:
+      'Score formatting duplication is acceptable for consistent UI display',
+  },
+
+  // D3/Canvas Event Handlers - Standard visualization patterns
+  {
+    name: 'visualization-handlers',
+    detect: (file, code) => {
+      const isVizFile =
+        file.includes('/visualizer/') ||
+        file.includes('/charts/') ||
+        file.includes('GraphCanvas') ||
+        file.includes('ForceDirected');
+
+      const hasVizPattern =
+        (code.includes('dragstarted') ||
+          code.includes('dragged') ||
+          code.includes('dragended')) &&
+        (code.includes('simulation') ||
+          code.includes('d3.') ||
+          code.includes('alphaTarget'));
+
+      return isVizFile && hasVizPattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'D3/visualization event handlers follow standard patterns and are intentionally similar',
+    suggestion:
+      'Visualization boilerplate duplication is acceptable for interactive charts',
+  },
+
+  // Icon/Switch Statement Helpers - Common enum-to-value patterns
+  {
+    name: 'switch-helpers',
+    detect: (file, code) => {
+      const hasSwitchPattern =
+        code.includes('switch (') &&
+        code.includes("case '") &&
+        code.includes('return') &&
+        code.split('case ').length >= 4; // Multiple cases
+
+      const hasIconPattern =
+        code.includes('getIcon') ||
+        code.includes('getColor') ||
+        code.includes('getLabel') ||
+        code.includes('getRating');
+
+      return hasSwitchPattern && hasIconPattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'Switch statement helpers for enum-to-value mapping are inherently similar',
+    suggestion:
+      'Switch duplication is acceptable for mapping enums to display values',
+  },
+
   // Common API/Utility Functions - Legitimate duplication across modules
   {
     name: 'common-api-functions',
@@ -320,7 +429,11 @@ export const CONTEXT_RULES: ContextRule[] = [
           code.includes('queryItems')) ||
         (code.includes('getRemediation') && code.includes('queryItems')) ||
         (code.includes('formatBreakdownKey') &&
-          code.includes('.replace(/([A-Z])/g'));
+          code.includes('.replace(/([A-Z])/g')) ||
+        (code.includes('queryItems') &&
+          code.includes('KeyConditionExpression')) ||
+        (code.includes('putItem') && code.includes('createdAt')) ||
+        (code.includes('updateItem') && code.includes('buildUpdateExpression'));
 
       return isApiFile && hasCommonApiPattern;
     },
@@ -377,7 +490,7 @@ export const CONTEXT_RULES: ContextRule[] = [
 
       return hasValidationPattern;
     },
-    severity: Severity.Minor,
+    severity: Severity.Info,
     reason:
       'Validation functions are inherently similar and often intentionally duplicated for domain clarity',
     suggestion:
