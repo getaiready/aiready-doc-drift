@@ -205,6 +205,42 @@ export function filterClustersByImpact(
 }
 
 /**
+ * Check if code is a pure interface/type definition (no implementation)
+ * These are often intentionally duplicated for type safety across modules
+ */
+function isPureInterfaceDefinition(code: string): boolean {
+  const trimmed = code.trim();
+
+  // Must be an interface or type declaration
+  if (
+    !trimmed.startsWith('interface ') &&
+    !trimmed.startsWith('type ') &&
+    !trimmed.startsWith('export interface ') &&
+    !trimmed.startsWith('export type ') &&
+    !trimmed.startsWith('enum ') &&
+    !trimmed.startsWith('export enum ')
+  ) {
+    return false;
+  }
+
+  // Must not have implementation (= { or function bodies)
+  if (
+    trimmed.includes('={') ||
+    trimmed.includes('=> {') ||
+    trimmed.includes('function ') ||
+    trimmed.includes('() {') ||
+    trimmed.includes(' implements ')
+  ) {
+    return false;
+  }
+
+  // Must be relatively short (type definitions are typically < 200 chars)
+  if (trimmed.length > 200) return false;
+
+  return true;
+}
+
+/**
  * Brand-specific indicators that suggest UI components are intentionally different
  */
 const BRAND_INDICATORS = [
@@ -292,7 +328,17 @@ export function filterBrandSpecificVariants(
       dup.suggestion = 'Brand-specific themed component variant (intentional)';
     }
 
-    // Keep all duplicates but downgrade severity for brand variants
+    // Check if this is a pure interface/type definition
+    const isInterfaceDef =
+      isPureInterfaceDefinition(dup.code1) &&
+      isPureInterfaceDefinition(dup.code2);
+    if (isInterfaceDef) {
+      dup.severity = Severity.Info;
+      dup.suggestion =
+        'Pure interface/type definition - intentional for module independence';
+    }
+
+    // Keep all duplicates but downgrade severity for brand variants and interfaces
     return true;
   });
 }

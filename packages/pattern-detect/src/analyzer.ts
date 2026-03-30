@@ -9,6 +9,7 @@ import {
   groupDuplicatesByFilePair,
   createRefactorClusters,
   filterClustersByImpact,
+  filterBrandSpecificVariants,
   type DuplicateGroup,
   type RefactorCluster,
 } from './grouping';
@@ -267,6 +268,9 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     onProgress: options.onProgress,
   });
 
+  // Apply filters to downgrade severity for brand variants and interface definitions
+  filterBrandSpecificVariants(duplicates);
+
   for (const file of files) {
     const fileDuplicates = duplicates.filter(
       (dup) => dup.file1 === file || dup.file2 === file
@@ -274,12 +278,21 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
 
     const issues: Issue[] = fileDuplicates.map((dup) => {
       const otherFile = dup.file1 === file ? dup.file2 : dup.file1;
-      const severity: Severity =
-        dup.similarity > 0.95
-          ? Severity.Critical
-          : dup.similarity > 0.9
-            ? Severity.Major
-            : Severity.Minor;
+      // Use dup.severity if already lowered (e.g., by filterBrandSpecificVariants), otherwise calculate from similarity
+      let severity: Severity;
+      if (
+        (dup.severity as string) === 'info' ||
+        (dup.severity as string) === 'Info'
+      ) {
+        severity = Severity.Info;
+      } else {
+        severity =
+          dup.similarity > 0.95
+            ? Severity.Critical
+            : dup.similarity > 0.9
+              ? Severity.Major
+              : Severity.Minor;
+      }
 
       return {
         type: IssueType.DuplicatePattern,
