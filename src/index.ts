@@ -1,10 +1,10 @@
 import { ToolRegistry } from '@aiready/core';
-import { DocDriftProvider } from './provider';
+import { DOC_DRIFT_PROVIDER } from './provider';
 
 // Register with global registry
-ToolRegistry.register(DocDriftProvider);
+ToolRegistry.register(DOC_DRIFT_PROVIDER);
 
 export * from './types';
 export * from './analyzer';
 export * from './scoring';
-export { DocDriftProvider };
+export { DOC_DRIFT_PROVIDER };

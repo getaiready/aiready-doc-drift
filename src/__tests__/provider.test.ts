@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DocDriftProvider } from '../provider';
+import { DOC_DRIFT_PROVIDER } from '../provider';
 import * as analyzer from '../analyzer';
 
 vi.mock('../analyzer', () => ({
@@ -26,7 +26,7 @@ describe('Doc Drift Provider', () => {
       recommendations: [],
     });
 
-    const output = await DocDriftProvider.analyze({ rootDir: '.' });
+    const output = await DOC_DRIFT_PROVIDER.analyze({ rootDir: '.' });
 
     expect(output.summary.filesAnalyzed).toBe(1);
     expect(output.metadata!.toolName).toBe('doc-drift');
@@ -39,7 +39,9 @@ describe('Doc Drift Provider', () => {
       results: [],
     };
 
-    const scoring = DocDriftProvider.score(mockOutput as any, { rootDir: '.' });
+    const scoring = DOC_DRIFT_PROVIDER.score(mockOutput as any, {
+      rootDir: '.',
+    });
     expect(scoring.score).toBe(80);
     expect(scoring.recommendations[0].action).toBe('Fix it');
   });
