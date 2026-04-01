@@ -49,70 +49,29 @@ RELEASE_DISTRIBUTION      ?= 1
 # Internal macros
 ###############################################################################
 
-# Resolve bump target name from TYPE (Make-level: returns version-patch|minor|major)
-define bump_target_for_type
-$(if $(filter $(1),patch),version-patch,$(if $(filter $(1),minor),version-minor,$(if $(filter $(1),major),version-major,)))
-endef
+###############################################################################
+# Internal parallel helpers
+###############################################################################
 
-# TYPE validation (shell-level). Use as: @$(validate_type)
-define validate_type
-	if [ -z "$(TYPE)" ]; then \
-		$(call log_error,TYPE required: make $@ TYPE=patch|minor|major); \
-		exit 1; \
-	fi; \
-	if [ "$(TYPE)" != "patch" ] && [ "$(TYPE)" != "minor" ] && [ "$(TYPE)" != "major" ]; then \
-		$(call log_error,Invalid TYPE '$(TYPE)'. Expected patch|minor|major); \
-		exit 1; \
-	fi
-endef
+# Internal parallel helper for release-all
+.PHONY: release-spoke-%
+release-spoke-%:
+	@$(call log_info,Releasing spoke @aiready/$*...); \
+	$(MAKE) npm-publish SPOKE=$* || exit 1; \
+	$(MAKE) publish SPOKE=$* PUBLIC_OWNER=$(PUBLIC_OWNER) || exit 1; \
+	$(call log_success,Released @aiready/$*)
 
-# Conditionally run a shell command based on a flag value (1=run, 0=skip).
-# $(1)=flag value  $(2)=shell command  $(3)=human label
-define run_if_enabled
-	if [ "$(strip $(1))" = "1" ]; then \
-		$(2); \
-	else \
-		$(call log_info,Skipping $(3)); \
-	fi
-endef
+# Internal parallel helper for versioning
+.PHONY: version-spoke-%
+version-spoke-%:
+	@$(MAKE) version-$(TYPE) SPOKE=$*
 
-# Commit package.json + create annotated tag for any non-spoke app.
-# $(1)=abs dir  $(2)=git-relative dir  $(3)=display name  $(4)=tag prefix
-define commit_and_tag_app
-	version=$$(node -p "require('$(1)/package.json').version"); \
-	$(call log_step,Committing $(3) v$$version...); \
-	cd $(ROOT_DIR) && git add . ; \
-	cd $(ROOT_DIR) && git commit -m "chore(release): $(3) v$$version"; \
-	tag_name="$(4)-v$$version"; \
-	$(call log_step,Tagging $$tag_name...); \
-	cd $(ROOT_DIR) && git tag -a "$$tag_name" -m "Release $(3) v$$version"; \
-	$(call log_success,Committed and tagged $$tag_name)
-endef
-
-# Force-create a dev tag (no commit).  $(1)=abs dir  $(2)=tag prefix  $(3)=display name
-define tag_dev_release
-	version=$$(node -p "require('$(1)/package.json').version"); \
-	$(call log_step,Tagging $(3) dev release $$version...); \
-	cd $(ROOT_DIR) && git tag -f -a "$(2)-dev-v$$version" -m "Dev release $(3) v$$version"; \
-	$(call log_success,Tagged $(2)-dev-v$$version)
-endef
-
-# Commit + tag for an npm spoke (uses Make var SPOKE, not call args)
-define commit_and_tag
-	version=$$(node -p "require('$(ROOT_DIR)/packages/$(SPOKE)/package.json').version"); \
-	$(call log_step,Committing @aiready/$(SPOKE) v$$version...); \
-	cd $(ROOT_DIR) && git add . ; \
-	cd $(ROOT_DIR) && git commit -m "chore(release): @aiready/$(SPOKE) v$$version"; \
-	tag_name="$(SPOKE)-v$$version"; \
-	$(call log_step,Tagging $$tag_name...); \
-	cd $(ROOT_DIR) && git tag -f -a "$$tag_name" -m "Release @aiready/$(SPOKE) v$$version"; \
-	$(call log_success,Committed and tagged $$tag_name)
-endef
-
-# Shorthand dev tag for platform (used by release-dev)
-define tag_platform_dev
-	$(call tag_dev_release,$(PLATFORM_DIR),platform,@aiready/platform)
-endef
+# Internal parallel helper for tagging
+.PHONY: tag-spoke-%
+tag-spoke-%:
+	@version=$$(node -p "require('$(ROOT_DIR)/packages/$*/package.json').version"); \
+	$(call log_step,Tagging @aiready/$* v$$version...); \
+	cd $(ROOT_DIR) && git tag -f -a "$*-v$$version" -m "Release @aiready/$* v$$version" || true
 
 # Internal parallel helper for release-all
 .PHONY: release-spoke-%
@@ -185,26 +144,18 @@ release-checks-clawmore: ## Shared checks for clawmore release
 # Version bump targets
 ###############################################################################
 
-# App-specific version bump targets (apps/*)
-version-landing-%: ## Bump landing version: version-landing-patch|minor|major
-	@$(call log_step,Bumping landing version ($*)...)
-	@npm --prefix $(LANDING_DIR) version $* --no-git-tag-version
-	@$(call log_success,landing bumped to $$(node -p "require('$(LANDING_DIR)/package.json').version"))
+# App-specific version bump targets (using unified maybe_bump_version)
+version-landing-%:
+	@$(call maybe_bump_version,$(LANDING_DIR),landing,$*,$(or $(TAG_PREFIX),landing))
 
-version-platform-%: ## Bump platform version: version-platform-patch|minor|major
-	@$(call log_step,Bumping platform version ($*)...)
-	@npm --prefix $(PLATFORM_DIR) version $* --no-git-tag-version
-	@$(call log_success,platform bumped to $$(node -p "require('$(PLATFORM_DIR)/package.json').version"))
+version-platform-%:
+	@$(call maybe_bump_version,$(PLATFORM_DIR),platform,$*,$(or $(TAG_PREFIX),platform))
 
-version-vscode-%: ## Bump vscode-extension version: version-vscode-patch|minor|major
-	@$(call log_step,Bumping VS Code extension version ($*)...)
-	@npm --prefix $(EXTENSION_DIR) version $* --no-git-tag-version
-	@$(call log_success,vscode-extension bumped to $$(node -p "require('$(EXTENSION_DIR)/package.json').version"))
+version-vscode-%:
+	@$(call maybe_bump_version,$(EXTENSION_DIR),vscode-extension,$*,$(or $(TAG_PREFIX),vscode-extension))
 
-version-clawmore-%: ## Bump clawmore version: version-clawmore-patch|minor|major
-	@$(call log_step,Bumping clawmore version ($*)...)
-	@npm --prefix $(CLAWMORE_DIR) version $* --no-git-tag-version
-	@$(call log_success,clawmore bumped to $$(node -p "require('$(CLAWMORE_DIR)/package.json').version"))
+version-clawmore-%:
+	@$(call maybe_bump_version,$(CLAWMORE_DIR),clawmore,$*,$(or $(TAG_PREFIX),clawmore))
 
 # npm spoke version bump targets (packages/*)
 version-%: ## Bump npm spoke version: version-patch|minor|major SPOKE=name
@@ -220,28 +171,10 @@ version-%: ## Bump npm spoke version: version-patch|minor|major SPOKE=name
 release-clawmore: release-clawmore-prod ## Alias -> release-clawmore-prod
 
 release-clawmore-dev: verify-aws-account ## Deploy ClawMore to dev stage: TYPE=patch|minor|major
-	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-clawmore-$(TYPE)
-	@$(call commit_and_tag_app,$(CLAWMORE_DIR),clawmore,clawmore,clawmore-dev)
-	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-clawmore,clawmore checks)
-	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(CLAWMORE_DIR) && pnpm build,clawmore build)
-	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-clawmore-dev,clawmore dev deploy)
-	@$(call run_if_enabled,$(RELEASE_E2E),$(MAKE) -C $(ROOT_DIR) test-clawmore-e2e-local,clawmore dev E2E)
-	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
-	@$(call log_success,Dev release finished for clawmore)
+	@$(call release_app,$(CLAWMORE_DIR),clawmore,clawmore,clawmore-dev,dev,deploy-clawmore-dev,,)
 
 release-clawmore-prod: verify-aws-account ## Release ClawMore to production: TYPE=patch|minor|major
-	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-clawmore-$(TYPE)
-	@$(call commit_and_tag_app,$(CLAWMORE_DIR),clawmore,clawmore,clawmore)
-	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-clawmore,clawmore checks)
-	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(CLAWMORE_DIR) && pnpm build,clawmore build)
-	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-clawmore-prod,clawmore production deploy)
-	@$(call run_if_enabled,$(RELEASE_VERIFY),$(MAKE) -C $(ROOT_DIR) clawmore-verify || $(call log_warning,Verification timed out - may still be deploying),clawmore verify)
-	@$(call run_if_enabled,$(RELEASE_E2E),$(MAKE) -C $(ROOT_DIR) test-clawmore-e2e-prod,clawmore prod E2E)
-	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) publish-clawmore PRIVATE_OWNER=$(PRIVATE_OWNER),publish clawmore)
-	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
-	@$(call log_success,Release finished for clawmore)
+	@$(call release_app,$(CLAWMORE_DIR),clawmore,clawmore,clawmore,production,deploy-clawmore-prod,clawmore-verify,publish-clawmore PRIVATE_OWNER=$(PRIVATE_OWNER),test-clawmore-e2e-prod)
 
 ###############################################################################
 # Landing Release
@@ -250,50 +183,20 @@ release-clawmore-prod: verify-aws-account ## Release ClawMore to production: TYP
 release-landing: release-landing-prod ## Alias -> release-landing-prod
 
 release-landing-dev: ## Release landing to dev stage: TYPE=patch|minor|major
-	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-landing-$(TYPE)
-	@$(call commit_and_tag_app,$(LANDING_DIR),landing,@aiready/landing,landing-dev)
-	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-landing,landing checks)
-	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(LANDING_DIR) && pnpm build,landing build)
-	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-landing-dev,landing dev deploy)
-	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
-	@$(call log_success,Dev release finished for @aiready/landing)
+	@$(call release_app,$(LANDING_DIR),landing,@aiready/landing,landing-dev,dev,deploy-landing-dev,,)
 
 release-landing-prod: ## Release landing to production: TYPE=patch|minor|major
-	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-landing-$(TYPE)
-	@$(call commit_and_tag_app,$(LANDING_DIR),landing,@aiready/landing,landing)
-	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-landing,landing checks)
-	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(LANDING_DIR) && pnpm build,landing build)
-	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-landing-prod,landing production deploy)
-	@$(call run_if_enabled,$(RELEASE_VERIFY),$(MAKE) -C $(ROOT_DIR) landing-verify VERIFY_RETRIES=3 VERIFY_WAIT=10 || $(call log_warning,Verification timed out - CloudFront may still be propagating),landing verify)
-	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) publish-landing PUBLIC_OWNER=$(PUBLIC_OWNER),publish landing)
-	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
-	@$(call log_success,Release finished for @aiready/landing)
+	@$(call release_app,$(LANDING_DIR),landing,@aiready/landing,landing,production,deploy-landing-prod,landing-verify VERIFY_RETRIES=3 VERIFY_WAIT=10,publish-landing PUBLIC_OWNER=$(PUBLIC_OWNER))
 
 ###############################################################################
 # Platform Release
 ###############################################################################
 
 release-platform-dev: verify-aws-account ## Release platform to dev stage: TYPE=patch|minor|major
-	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-platform-$(TYPE)
-	@$(call commit_and_tag_app,$(PLATFORM_DIR),platform,@aiready/platform,platform-dev)
-	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(PLATFORM_DIR) && pnpm build,platform build)
-	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-platform,platform dev deploy)
-	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
-	@$(call log_success,Dev release finished for @aiready/platform)
+	@$(call release_app,$(PLATFORM_DIR),platform,@aiready/platform,platform-dev,dev,deploy-platform,,)
 
 release-platform: verify-aws-account ## Release platform to production: TYPE=patch|minor|major
-	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-platform-$(TYPE)
-	@$(call commit_and_tag_app,$(PLATFORM_DIR),platform,@aiready/platform,platform)
-	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(PLATFORM_DIR) && pnpm build,platform build)
-	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-platform,platform checks)
-	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-platform-prod,platform production deploy)
-	@$(call run_if_enabled,$(RELEASE_VERIFY),$(MAKE) -C $(ROOT_DIR) platform-verify || $(call log_warning,Verification failed - platform may still be deploying),platform verify)
-	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
-	@$(call log_success,Release finished for @aiready/platform)
+	@$(call release_app,$(PLATFORM_DIR),platform,@aiready/platform,platform,production,deploy-platform-prod,platform-verify,)
 
 ###############################################################################
 # VS Code Extension Release
@@ -301,7 +204,7 @@ release-platform: verify-aws-account ## Release platform to production: TYPE=pat
 
 release-vscode: ## Release VS Code extension: TYPE=patch|minor|major
 	@$(validate_type)
-	@$(MAKE) -C $(ROOT_DIR) version-vscode-$(TYPE)
+	@$(call maybe_bump_app_version,$(EXTENSION_DIR),vscode-extension,$(TYPE),vscode-extension)
 	@$(call commit_and_tag_app,$(EXTENSION_DIR),vscode-extension,vscode-extension,vscode-extension)
 	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(EXTENSION_DIR) && pnpm build,vscode build)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) publish-vscode TYPE=$(TYPE) && $(MAKE) -C $(ROOT_DIR) publish-vscode-sync PUBLIC_OWNER=$(PUBLIC_OWNER) && $(MAKE) -C $(ROOT_DIR) publish-action-sync PUBLIC_OWNER=$(PUBLIC_OWNER) OWNER=$(OWNER),publish vscode)

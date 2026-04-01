@@ -125,35 +125,16 @@ npm-publish: npm-check ## Publish spoke to npm. Usage: make npm-publish SPOKE=pa
 # Generic GitHub publish (requires SPOKE parameter)
 publish: ## Publish spoke to GitHub. Usage: make publish SPOKE=pattern-detect [OWNER=username]
 	$(call require_spoke)
-	@$(call log_step,Publishing @aiready/$(SPOKE) to GitHub...)
-	@url="https://github.com/$(or $(OWNER),$(PUBLIC_OWNER))/aiready-$(SPOKE).git"; \
-	remote="aiready-$(SPOKE)"; \
-	branch="publish-$(SPOKE)"; \
-	spk_dir="$(call SPOKE_DIR,$(SPOKE))"; \
-	git remote add "$$remote" "$$url" 2>/dev/null || git remote set-url "$$remote" "$$url"; \
-	$(call log_info,Remote set: $$remote -> $$url); \
-	git branch -D "$$branch" >/dev/null 2>&1 || true; \
-	$(call log_info,Creating subtree split for "$$spk_dir"...); \
-	git subtree split --prefix="$$spk_dir" -b "$$branch" >/dev/null; \
-	$(call log_info,Subtree split complete: $$branch); \
-	split_commit=$$(git rev-parse "$$branch"); \
-	git push --no-verify -f "$$remote" "$$branch":$(TARGET_BRANCH); \
-	$(call log_success,Synced @aiready/$(SPOKE) to GitHub spoke repo ($(TARGET_BRANCH))); \
-	version=$$(node -p "require('$(ROOT_DIR)/$$spk_dir/package.json').version"); \
-	spoke_tag="v$$version"; \
-	$(call log_step,Tagging spoke repo commit $$split_commit as $$spoke_tag...); \
-	if git ls-remote --tags "$$remote" "$$spoke_tag" | grep -q "$$spoke_tag"; then \
-		$(call log_info,Spoke tag $$spoke_tag already exists on $$remote; skipping); \
-	else \
-		git tag -a "$$spoke_tag" "$$split_commit" -m "Release @aiready/$(SPOKE) $$version"; \
-		git push --no-verify "$$remote" "$$spoke_tag"; \
-		$(call log_success,Spoke tag pushed: $$spoke_tag); \
-	fi
+	$(call sync_to_github,$(call SPOKE_DIR,$(SPOKE)),aiready-$(SPOKE),$(or $(OWNER),$(PUBLIC_OWNER)),$(TARGET_BRANCH),$(SPOKE))
 
-# Convenience aliases for specific spokes
-publish-core: ## Publish @aiready/core to GitHub (shortcut for: make publish SPOKE=core)
-	@$(MAKE) publish SPOKE=core PUBLIC_OWNER=$(PUBLIC_OWNER)
+# Pattern rules for convenience
+publish-%: ## Publish @aiready/% to GitHub
+	@$(MAKE) publish SPOKE=$*
 
+npm-publish-%: ## Publish @aiready/% to npm
+	@$(MAKE) npm-publish SPOKE=$*
+
+# Specific app/spoke publish overrides or additional steps
 publish-paks: ## Publish agent skills to Playbooks.com (Paks registry)
 	@$(call log_step,Publishing agent skills to Playbooks.com...)
 	@if [ -f packages/skills/.env ]; then \
@@ -181,71 +162,9 @@ publish-paks: ## Publish agent skills to Playbooks.com (Paks registry)
 	}
 	@$(call log_success,Published skills to Playbooks.com using tag $$version)
 
-publish-pattern-detect: ## Publish @aiready/pattern-detect to GitHub (shortcut for: make publish SPOKE=pattern-detect)
-	@$(MAKE) publish SPOKE=pattern-detect PUBLIC_OWNER=$(PUBLIC_OWNER)
-
-publish-context-analyzer: ## Publish @aiready/context-analyzer to GitHub (shortcut for: make publish SPOKE=context-analyzer)
-	@$(MAKE) publish SPOKE=context-analyzer PUBLIC_OWNER=$(PUBLIC_OWNER)
-
-publish-cli: ## Publish @aiready/cli to GitHub (shortcut for: make publish SPOKE=cli)
-	@$(MAKE) publish SPOKE=cli PUBLIC_OWNER=$(PUBLIC_OWNER)
-
-publish-skills: ## Publish @aiready/skills to GitHub (shortcut for: make publish SPOKE=skills)
-	@$(MAKE) publish SPOKE=skills PUBLIC_OWNER=$(PUBLIC_OWNER)
-
-publish-mcp-server: ## Publish @aiready/mcp-server to GitHub
-	@$(MAKE) publish SPOKE=mcp-server PUBLIC_OWNER=$(PUBLIC_OWNER)
-
-publish-contract-enforcement: ## Publish @aiready/contract-enforcement to GitHub
-	@$(MAKE) publish SPOKE=contract-enforcement PUBLIC_OWNER=$(PUBLIC_OWNER)
-
-npm-publish-core: ## Publish @aiready/core to npm (shortcut for: make npm-publish SPOKE=core)
-	@$(MAKE) npm-publish SPOKE=core OTP=$(OTP)
-
-npm-publish-pattern-detect: ## Publish @aiready/pattern-detect to npm (shortcut for: make npm-publish SPOKE=pattern-detect)
-	@$(MAKE) npm-publish SPOKE=pattern-detect OTP=$(OTP)
-
-npm-publish-context-analyzer: ## Publish @aiready/context-analyzer to npm (shortcut for: make npm-publish SPOKE=context-analyzer)
-	@$(MAKE) npm-publish SPOKE=context-analyzer OTP=$(OTP)
-
-npm-publish-cli: ## Publish @aiready/cli to npm (shortcut for: make npm-publish SPOKE=cli)
-	@$(MAKE) npm-publish SPOKE=cli OTP=$(OTP)
-
-npm-publish-consistency: ## Publish @aiready/consistency to npm
-	@$(MAKE) npm-publish SPOKE=consistency OTP=$(OTP)
-
-npm-publish-doc-drift: ## Publish @aiready/doc-drift to npm
-	@$(MAKE) npm-publish SPOKE=doc-drift OTP=$(OTP)
-
-npm-publish-deps: ## Publish @aiready/deps to npm
-	@$(MAKE) npm-publish SPOKE=deps OTP=$(OTP)
-
-
-
-npm-publish-testability: ## Publish @aiready/testability to npm
-	@$(MAKE) npm-publish SPOKE=testability OTP=$(OTP)
-
-npm-publish-agent-grounding: ## Publish @aiready/agent-grounding to npm
-	@$(MAKE) npm-publish SPOKE=agent-grounding OTP=$(OTP)
-
-npm-publish-ai-signal-clarity: ## Publish @aiready/ai-signal-clarity to npm
-	@$(MAKE) npm-publish SPOKE=ai-signal-clarity OTP=$(OTP)
-
-npm-publish-change-amplification: ## Publish @aiready/change-amplification to npm
-	@$(MAKE) npm-publish SPOKE=change-amplification OTP=$(OTP)
-
-npm-publish-contract-enforcement: ## Publish @aiready/contract-enforcement to npm
-	@$(MAKE) npm-publish SPOKE=contract-enforcement OTP=$(OTP)
-
-npm-publish-visualizer: ## Publish @aiready/visualizer to npm
-	@$(MAKE) npm-publish SPOKE=visualizer OTP=$(OTP)
-
 # Note: skills is NOT published to npm, only via skills.sh (GitHub)
 
-npm-publish-all: build npm-publish-core npm-publish-pattern-detect npm-publish-context-analyzer npm-publish-cli \
-	npm-publish-consistency npm-publish-doc-drift npm-publish-deps \
-	npm-publish-testability npm-publish-agent-grounding npm-publish-visualizer \
-	npm-publish-ai-signal-clarity npm-publish-change-amplification npm-publish-contract-enforcement
+npm-publish-all: build $(addprefix npm-publish-,$(NPM_PUBLISH_SPOKES))
 
 # Sync changes from spoke repos back to monorepo (for external contributions)
 sync-from-spoke: ## Sync changes from spoke repo back to monorepo. Usage: make sync-from-spoke SPOKE=pattern-detect
@@ -281,33 +200,7 @@ sync-platform: ## Sync changes from aiready-platform back to monorepo
 	$(call log_success,Synced changes from aiready-platform)
 
 publish-platform: ## Publish platform to GitHub. Usage: make publish-platform [PRIVATE_OWNER=username]
-	@$(call log_step,Publishing platform to GitHub...)
-	@url="https://github.com/$(PRIVATE_OWNER)/aiready-platform.git"; \
-	remote="aiready-platform"; \
-	branch="publish-platform"; \
-	target_branch="main"; \
-	platform_version=$$(node -p "require('$(REPO_ROOT)/apps/platform/package.json').version" 2>/dev/null || echo "0.1.0"); \
-	git remote add "$$remote" "$$url" 2>/dev/null || git remote set-url "$$remote" "$$url"; \
-	$(call log_info,Remote set: $$remote -> $$url); \
-	git branch -D "$$branch" >/dev/null 2>&1 || true; \
-	$(call log_info,Creating subtree split for apps/platform...); \
-	git subtree split --prefix=apps/platform -b "$$branch" >/dev/null; \
-	$(call log_info,Removing sensitive files from split branch...); \
-	git checkout "$$branch" 2>/dev/null; \
-	if [ -f .env ]; then git rm -f .env >/dev/null 2>&1; fi; \
-	if [ -f .env.local ]; then git rm -f .env.local >/dev/null 2>&1; fi; \
-	if ! git diff --cached --quiet 2>/dev/null; then \
-		git commit -m "chore: remove sensitive files for private repo" >/dev/null 2>&1; \
-	fi; \
-	git checkout $(TARGET_BRANCH) 2>/dev/null; \
-	$(call log_info,Subtree split complete: $$branch); \
-	split_commit=$$(git rev-parse "$$branch"); \
-	git push -f "$$remote" "$$branch:$$target_branch"; \
-	$(call log_success,Synced platform to GitHub repo ($$target_branch)); \
-	platform_tag="v$$platform_version"; \
-	git tag -f "$$platform_tag" "$$split_commit" -m "Release platform v$$platform_version" 2>/dev/null || true; \
-	git push -f "$$remote" "$$platform_tag"; \
-	$(call log_success,Platform tag pushed: $$platform_tag)
+	$(call sync_to_github,apps/platform,aiready-platform,$(or $(OWNER),$(PRIVATE_OWNER)),main,platform,$(STRIP_STANDALONE))
 
 # Sync changes from landing repo back to monorepo
 sync-landing: ## Sync changes from aiready-landing back to monorepo
@@ -323,34 +216,7 @@ sync-landing: ## Sync changes from aiready-landing back to monorepo
 	$(call log_success,Synced changes from aiready-landing)
 
 publish-landing: ## Publish landing page to GitHub. Usage: make publish-landing [PUBLIC_OWNER=username]
-	@$(call log_step,Publishing landing page to GitHub...)
-	@url="https://github.com/$(PUBLIC_OWNER)/aiready-landing.git"; \
-	remote="aiready-landing"; \
-	branch="publish-landing"; \
-	target_branch="main"; \
-	landing_version=$$(node -p "require('$(REPO_ROOT)/apps/landing/package.json').version" 2>/dev/null || echo "0.0.0"); \
-	git remote add "$$remote" "$$url" 2>/dev/null || git remote set-url "$$remote" "$$url"; \
-	$(call log_info,Remote set: $$remote -> $$url); \
-	git branch -D "$$branch" >/dev/null 2>&1 || true; \
-	$(call log_info,Creating subtree split excluding sst.config.ts and .env...); \
-	git subtree split --prefix=apps/landing -b "$$branch" >/dev/null; \
-	$(call log_info,Removing sensitive files from split branch...); \
-	git checkout "$$branch" 2>/dev/null; \
-	if [ -f sst.config.ts ]; then git rm -f sst.config.ts >/dev/null 2>&1; fi; \
-	if [ -f .env ]; then git rm -f .env >/dev/null 2>&1; fi; \
-	if ! git diff --cached --quiet 2>/dev/null; then \
-		git commit -m "chore: remove sensitive files for public repo" >/dev/null 2>&1; \
-	fi; \
-	git checkout $(TARGET_BRANCH) 2>/dev/null; \
-	$(call log_info,Subtree split complete: $$branch); \
-	split_commit=$$(git rev-parse "$$branch"); \
-	git push -f "$$remote" "$$branch:$$target_branch"; \
-	$(call log_success,Synced landing page to GitHub repo ($$target_branch)); \
-	$(call log_step,Tagging landing repo commit with v$$landing_version...); \
-	landing_tag="v$$landing_version"; \
-	git tag -f "$$landing_tag" "$$split_commit" -m "Release landing v$$landing_version" 2>/dev/null || true; \
-	git push -f "$$remote" "$$landing_tag"; \
-	$(call log_success,Landing tag pushed: $$landing_tag)
+	$(call sync_to_github,apps/landing,aiready-landing,$(or $(OWNER),$(PUBLIC_OWNER)),main,landing,$(STRIP_STANDALONE))
 
 # Sync changes from clawmore repo back to monorepo
 sync-clawmore: ## Sync changes from aiready-clawmore back to monorepo
@@ -367,25 +233,7 @@ sync-clawmore: ## Sync changes from aiready-clawmore back to monorepo
 
 
 publish-clawmore: ## Publish clawmore to GitHub. Usage: make publish-clawmore [PRIVATE_OWNER=username]
-	@$(call log_step,Publishing clawmore to GitHub...)
-	@url="https://github.com/$(PRIVATE_OWNER)/aiready-clawmore.git"; \
-	remote="aiready-clawmore"; \
-	branch="publish-clawmore"; \
-	target_branch="main"; \
-	clawmore_version=$$(node -p "require('$(REPO_ROOT)/apps/clawmore/package.json').version" 2>/dev/null || echo "0.1.0"); \
-	git remote add "$$remote" "$$url" 2>/dev/null || git remote set-url "$$remote" "$$url"; \
-	$(call log_info,Remote set: $$remote -> $$url); \
-	git branch -D "$$branch" >/dev/null 2>&1 || true; \
-	$(call log_info,Creating subtree split for apps/clawmore...); \
-	git subtree split --prefix=apps/clawmore -b "$$branch" >/dev/null; \
-	$(call log_info,Subtree split complete: $$branch); \
-	split_commit=$$(git rev-parse "$$branch"); \
-	git push -f "$$remote" "$$branch:$$target_branch"; \
-	$(call log_success,Synced clawmore to GitHub repo ($$target_branch)); \
-	clawmore_tag="v$$clawmore_version"; \
-	git tag -f "$$clawmore_tag" "$$split_commit" -m "Release clawmore v$$clawmore_version" 2>/dev/null || true; \
-	git push -f "$$remote" "$$clawmore_tag"; \
-	$(call log_success,ClawMore tag pushed: $$clawmore_tag)
+	$(call sync_to_github,apps/clawmore,aiready-clawmore,$(or $(OWNER),$(PRIVATE_OWNER)),main,clawmore,$(STRIP_STANDALONE))
 
 # Push to monorepo and all spoke repos
 sync: ## Push monorepo to origin and sync all spokes to their public repos. Use FORCE=true to sync all.
@@ -485,54 +333,10 @@ github-sync-action:
 
 
 publish-vscode-sync: ## Sync VS Code extension to GitHub. Usage: make publish-vscode-sync [PUBLIC_OWNER=username]
-	@$(call log_step,Publishing VS Code extension to GitHub...)
-	@url="https://github.com/$(PUBLIC_OWNER)/aiready-vscode-extension.git"; \
-	remote="aiready-vscode-extension"; \
-	branch="publish-vscode"; \
-	git remote add "$$remote" "$$url" 2>/dev/null || git remote set-url "$$remote" "$$url"; \
-	$(call log_info,Remote set: $$remote -> $$url); \
-	git branch -D "$$branch" >/dev/null 2>&1 || true; \
-	$(call log_info,Creating subtree split for apps/vscode-extension...); \
-	git subtree split --prefix=apps/vscode-extension -b "$$branch" >/dev/null; \
-	$(call log_info,Subtree split complete: $$branch); \
-	split_commit=$$(git rev-parse "$$branch"); \
-	git push -f "$$remote" "$$branch":$(TARGET_BRANCH); \
-	$(call log_success,Synced VS Code extension to GitHub spoke repo ($(TARGET_BRANCH))); \
-	version=$$(node -p "require('./apps/vscode-extension/package.json').version"); \
-	spoke_tag="v$$version"; \
-	$(call log_step,Tagging spoke repo commit $$split_commit as $$spoke_tag...); \
-	if git ls-remote --tags "$$remote" "$$spoke_tag" | grep -q "$$spoke_tag"; then \
-		$(call log_info,Spoke tag $$spoke_tag already exists on $$remote; skipping); \
-	else \
-		git tag -a "$$spoke_tag" "$$split_commit" -m "Release VS Code extension $$version"; \
-		git push "$$remote" "$$spoke_tag"; \
-		$(call log_success,Spoke tag pushed: $$spoke_tag); \
-	fi
+	$(call sync_to_github,apps/vscode-extension,aiready-vscode-extension,$(or $(OWNER),$(PUBLIC_OWNER)),main,vscode-extension)
 
 publish-action-sync: ## Sync GitHub Action to standalone repo. Usage: make publish-action-sync [PUBLIC_OWNER=username]
-	@$(call log_step,Publishing GitHub Action to standalone repo...)
-	@url="https://github.com/$(PUBLIC_OWNER)/aiready-action.git"; \
-	remote="aiready-action"; \
-	branch="publish-action"; \
-	git remote add "$$remote" "$$url" 2>/dev/null || git remote set-url "$$remote" "$$url"; \
-	$(call log_info,Remote set: $$remote -> $$url); \
-	git branch -D "$$branch" >/dev/null 2>&1 || true; \
-	$(call log_info,Creating subtree split for tooling/github-action...); \
-	git subtree split --prefix=tooling/github-action -b "$$branch" >/dev/null; \
-	$(call log_info,Subtree split complete: $$branch); \
-	split_commit=$$(git rev-parse "$$branch"); \
-	git push -f "$$remote" "$$branch":$(TARGET_BRANCH); \
-	$(call log_success,Synced GitHub Action to standalone repo ($(TARGET_BRANCH))); \
-	version=$$(node -p "require('./tooling/github-action/package.json').version"); \
-	spoke_tag="v$$version"; \
-	$(call log_step,Tagging action repo commit $$split_commit as $$spoke_tag...); \
-	if git ls-remote --tags "$$remote" "$$spoke_tag" | grep -q "$$spoke_tag"; then \
-		$(call log_info,Action tag $$spoke_tag already exists on $$remote; skipping); \
-	else \
-		git tag -a "$$spoke_tag" "$$split_commit" -m "Release GitHub Action $$version"; \
-		git push "$$remote" "$$spoke_tag"; \
-		$(call log_success,Action tag pushed: $$spoke_tag); \
-	fi
+	$(call sync_to_github,tooling/github-action,aiready-action,$(or $(OWNER),$(PUBLIC_OWNER)),main,github-action)
 
 # ============================================================================
 # MCP Server Publishing

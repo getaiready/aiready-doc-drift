@@ -19,46 +19,13 @@ SES_ADDITIONAL_CONTACT_EMAILS ?=
 ##@ Deployment
 
 deploy-landing: verify-aws-account ## Deploy landing page to AWS (default/dev user environment)
-	@$(call log_step,Deploying landing page to AWS (dev))
-	@echo "$(CYAN)Using AWS Profile: $(AWS_PROFILE)$(NC)"
-	@echo "$(CYAN)Using AWS Region: $(AWS_REGION)$(NC)"
-	@cd apps/landing && \
-		set -a && [ -f .env ] && . ./.env || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && \
-		export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" && \
-		sst deploy --yes
-	@$(call log_success,Landing page deployed)
+	$(call deploy_sst_app,apps/landing,landing,,1)
 
 deploy-landing-dev: verify-aws-account ## Deploy landing page to AWS (dedicated dev stage)
-	@$(call log_step,Deploying landing page to AWS (stage: dev))
-	@echo "$(CYAN)Using AWS Profile: $(AWS_PROFILE)$(NC)"
-	@echo "$(CYAN)Using AWS Region: $(AWS_REGION)$(NC)"
-	@cd apps/landing && \
-		set -a && [ -f .env ] && . ./.env || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && \
-		export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" && \
-		sst deploy --stage dev --yes
-	@$(call log_success,Landing page deployed to stage: dev)
+	$(call deploy_sst_app,apps/landing,landing,dev,1)
 
 deploy-landing-prod: verify-aws-account ## Deploy landing page to AWS (production)
-	@$(call log_step,Deploying landing page to AWS (production))
-	@echo "$(YELLOW)⚠️  Deploying to PRODUCTION$(NC)"
-	@echo "$(CYAN)Using AWS Profile: $(AWS_PROFILE)$(NC)"
-	@echo "$(CYAN)Using AWS Region: $(AWS_REGION)$(NC)"
-	@cd apps/landing && \
-		set -a && [ -f .env ] && . ./.env || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && \
-		export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" && \
-		sst deploy --stage production --yes
-	@$(call log_success,Landing page deployed to production)
-	@echo "$(CYAN)💡 Blog files synced during build, CloudFront invalidated automatically$(NC)"
-	@echo ""
+	$(call deploy_sst_app,apps/landing,landing,production,1)
 	@$(MAKE) -f $(MAKEFILE_DIR)/Makefile.deploy.mk landing-verify
 
 landing-verify: ## Verify site is accessible
@@ -86,32 +53,13 @@ landing-logs: ## Show landing page logs (requires SST dashboard)
 ##@ ClawMore Deployment
 
 deploy-clawmore: verify-aws-account ## Deploy ClawMore to AWS (default stage)
-	@$(call log_step,Deploying ClawMore to AWS)
-	@cd apps/clawmore && \
-		set -a && [ -f .env ] && . ./.env || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		sst deploy --yes
-	@$(call log_success,ClawMore deployed)
+	$(call deploy_sst_app,apps/clawmore,ClawMore,,)
 
 deploy-clawmore-dev: verify-aws-account ## Deploy ClawMore to AWS (stage: dev)
-	@$(call log_step,Deploying ClawMore to AWS (stage: dev))
-	@cd apps/clawmore && \
-		set -a && [ -f .env ] && . ./.env || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		sst deploy --stage dev --yes
-	@$(call log_success,ClawMore deployed to stage: dev)
+	$(call deploy_sst_app,apps/clawmore,ClawMore,dev,)
 
 deploy-clawmore-prod: verify-aws-account ## Deploy ClawMore to AWS (production)
-	@$(call log_step,Deploying ClawMore to AWS (production))
-	@echo "$(YELLOW)⚠️  Deploying to PRODUCTION$(NC)"
-	@cd apps/clawmore && \
-		set -a && [ -f .env ] && . ./.env || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		sst deploy --stage production --yes
-	@$(call log_success,ClawMore deployed to production)
+	$(call deploy_sst_app,apps/clawmore,ClawMore,production,)
 	@$(MAKE) -f $(MAKEFILE_DIR)/Makefile.deploy.mk clawmore-verify
 
 clawmore-verify: ## Verify ClawMore is accessible
@@ -151,23 +99,11 @@ clawmore-warm-pool: verify-aws-account ## Seed the ClawMore AWS account warm poo
 ##@ Platform Deployment
 
 deploy-platform: verify-aws-account ## Deploy platform to AWS (dev environment)
-	@$(call log_step,Deploying platform to AWS (dev))
-	@echo "$(CYAN)Using AWS Profile: $(AWS_PROFILE)$(NC)"
-	@cd apps/platform && \
-		[ -f .env.dev ] && set -a && . ./.env.dev && set +a || true && \
-		export NEXT_PUBLIC_APP_URL=$${NEXT_PUBLIC_APP_URL:-https://dev.platform.getaiready.dev} && \
-		AWS_PROFILE=$(AWS_PROFILE) pnpm run deploy
-	@$(call log_success,Platform deployed to dev)
+	$(call deploy_sst_app,apps/platform,platform,dev,)
 	@$(MAKE) platform-verify
 
 deploy-platform-prod: verify-aws-account ## Deploy platform to AWS (production)
-	@$(call log_step,Deploying platform to AWS (production))
-	@echo "$(YELLOW)⚠️  Deploying to PRODUCTION$(NC)"
-	@echo "$(CYAN)Using AWS Profile: $(AWS_PROFILE)$(NC)"
-	@cd apps/platform && \
-		[ -f .env.prod ] && set -a && . ./.env.prod && set +a || true && \
-		AWS_PROFILE=$(AWS_PROFILE) pnpm run deploy:prod
-	@$(call log_success,Platform deployed to production)
+	$(call deploy_sst_app,apps/platform,platform,prod,)
 
 
 ##@ Email (SES)

@@ -11,6 +11,10 @@ ifneq (,$(wildcard .env))
 	include .env
 	export
 endif
+
+# Include base macros
+BASE_MK := $(dir $(lastword $(MAKEFILE_LIST)))/Makefile.base.mk
+include $(BASE_MK)
 # Also load landing-specific env if present
 ifneq (,$(wildcard apps/landing/.env))
 	include apps/landing/.env
@@ -207,6 +211,20 @@ endef
 define kill_port
 	@lsof -ti :$(1) >/dev/null 2>&1 && lsof -ti :$(1) | xargs kill -9 2>/dev/null || true
 	@$(call log_success,Port $(1) is now free)
+endef
+
+# Standard cleanup for standalone (spoke/app) repositories
+# Strips sensitive files and monorepo-specific configs that break in standalone roots.
+define STRIP_STANDALONE
+	for f in .env .env.local .env.dev .env.prod sst.config.ts Makefile.shared.mk tsconfig.monorepo.json; do \
+		if [ -f "$$f" ]; then git rm -f "$$f" >/dev/null 2>&1; fi; \
+	done; \
+	for d in .sst .terraform .aws-sam; do \
+		if [ -d "$$d" ]; then git rm -rf "$$d" >/dev/null 2>&1; fi; \
+	done; \
+	if ! git diff --cached --quiet 2>/dev/null; then \
+		git commit -m "chore: cleanup sensitive/monorepo files for standalone repo" >/dev/null 2>&1; \
+	fi
 endef
 
 endif # AIREADY_SHARED_MK
