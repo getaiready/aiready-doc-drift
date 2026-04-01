@@ -16,6 +16,7 @@ import {
   ensureUserMetadata,
   updateProvisioningStatus,
 } from '../db';
+import { Resource } from 'sst';
 
 const dbClient = new DynamoDBClient({
   region: process.env.AWS_REGION || 'ap-southeast-2',
@@ -124,6 +125,7 @@ export class ProvisioningOrchestrator {
         bootstrapRoleArn
       );
       // Find the user ID for this email to inject it
+      const githubToken = Resource.GithubServiceToken.value;
       const userRes = await docClient.query({
         TableName: process.env.DYNAMO_TABLE || '',
         IndexName: 'GSI1',
@@ -152,7 +154,7 @@ export class ProvisioningOrchestrator {
         githubOrg,
         repoName,
         'HUB_EVENT_BUS_NAME',
-        process.env.CLAW_MORE_BUS || 'ClawMoreBus'
+        Resource.ClawMoreBus.name
       );
 
       // 5. SST Secret Injection (for spoke stack to boot)

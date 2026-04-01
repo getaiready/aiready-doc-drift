@@ -252,26 +252,36 @@ All infrastructure managed by **SST v4.0** via [`clawmore/sst.config.ts`](clawmo
 - [ ] Build customer portal
 - [ ] Add invoice generation
 
-### Phase 3: Observability (Week 3-4)
+### Phase 3: Evolution Separation (Week 3-4)
+
+- [ ] Define serverlessclaw API contract v1.0.0
+- [ ] Create adapter pattern implementation
+- [ ] Add contract test suite
+- [ ] Implement feature flag system for core integration
+- [ ] Establish compatibility matrix testing
+
+### Phase 4: Observability (Week 4-5)
 
 - [ ] Add error tracking (Sentry)
 - [ ] Implement structured logging
 - [ ] Create business metrics dashboard
 - [ ] Set up alerting
+- [ ] Add evolution monitoring dashboard
 
-### Phase 4: User Features (Week 4-5)
+### Phase 5: User Features (Week 5-6)
 
 - [ ] User registration flow
 - [ ] Customer dashboard
 - [ ] Usage reporting
 - [ ] Email notifications
 
-### Phase 5: Launch Prep (Week 5-6)
+### Phase 6: Launch Prep (Week 6-7)
 
 - [ ] Documentation
 - [ ] Terms of Service
 - [ ] Privacy Policy
 - [ ] Launch marketing
+- [ ] Evolution separation documentation
 
 ---
 

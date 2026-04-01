@@ -11,6 +11,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { reportOverageCharge } from '../lib/billing';
 import { sendCloudCostWarningEmail } from '../lib/email';
+import { Resource } from 'sst';
 
 const ceClient = new CostExplorerClient({ region: 'us-east-1' });
 const ddbClient = new DynamoDBClient({});
@@ -47,7 +48,7 @@ export const handler = async (_event: any) => {
     // 1. Fetch all ManagedAccounts from DynamoDB
     const accountsScan = await docClient.send(
       new ScanCommand({
-        TableName: process.env.DYNAMO_TABLE,
+        TableName: Resource.ClawMoreTable.name,
         FilterExpression: 'begins_with(PK, :pk_prefix) AND EntityType = :type',
         ExpressionAttributeValues: {
           ':pk_prefix': 'ACCOUNT#',
@@ -76,7 +77,7 @@ export const handler = async (_event: any) => {
       // Update DynamoDB with latest spend
       await docClient.send(
         new UpdateCommand({
-          TableName: process.env.DYNAMO_TABLE,
+          TableName: Resource.ClawMoreTable.name,
           Key: { PK: account.PK, SK: account.SK },
           UpdateExpression:
             'SET currentMonthlySpendCents = :spend, lastCostSync = :now',
@@ -114,7 +115,7 @@ export const handler = async (_event: any) => {
         // Mark warning as sent
         await docClient.send(
           new UpdateCommand({
-            TableName: process.env.DYNAMO_TABLE,
+            TableName: Resource.ClawMoreTable.name,
             Key: { PK: account.PK, SK: account.SK },
             UpdateExpression: 'SET costWarningSent = :sent',
             ExpressionAttributeValues: {
@@ -128,7 +129,7 @@ export const handler = async (_event: any) => {
       if (costCents < warningThreshold && hasSentWarning) {
         await docClient.send(
           new UpdateCommand({
-            TableName: process.env.DYNAMO_TABLE,
+            TableName: Resource.ClawMoreTable.name,
             Key: { PK: account.PK, SK: account.SK },
             UpdateExpression: 'REMOVE costWarningSent',
           })
@@ -155,7 +156,7 @@ export const handler = async (_event: any) => {
           // Update reported status
           await docClient.send(
             new UpdateCommand({
-              TableName: process.env.DYNAMO_TABLE,
+              TableName: Resource.ClawMoreTable.name,
               Key: { PK: account.PK, SK: account.SK },
               UpdateExpression: 'SET reportedOverageCents = :reported',
               ExpressionAttributeValues: {

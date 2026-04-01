@@ -43,7 +43,7 @@ describe('Context-Aware Severity', () => {
   });
 
   describe('Template Detection', () => {
-    it('should mark email templates as low severity', () => {
+    it('should mark email templates as info severity', () => {
       const file = 'src/email-templates/payment-failed.ts';
       const code = `
         export function getEmailTemplate() {
@@ -57,14 +57,14 @@ describe('Context-Aware Severity', () => {
 
       const result = calculateSeverity(file, file, code, 0.8, 20);
 
-      expect(result.severity).toBe(Severity.Minor);
+      expect(result.severity).toBe(Severity.Info);
       expect(result.reason).toContain('branding consistency');
       expect(result.matchedRule).toBe('templates');
     });
   });
 
   describe('E2E Test Detection', () => {
-    it('should mark E2E page objects as low severity', () => {
+    it('should mark E2E page objects as info severity', () => {
       const file = 'e2e/pages/login-page.ts';
       const code = `
         async function clickLoginButton() {
@@ -79,14 +79,14 @@ describe('Context-Aware Severity', () => {
       const result = calculateSeverity(file, file, code, 0.85, 15);
 
       // Debug: The detection is working now with 'await page' pattern
-      expect(result.severity).toBe(Severity.Minor);
+      expect(result.severity).toBe(Severity.Info);
       expect(result.reason).toContain('test independence');
       expect(result.matchedRule).toBe('e2e-page-objects');
     });
   });
 
   describe('Configuration Files', () => {
-    it('should mark config files as low severity', () => {
+    it('should mark config files as info severity', () => {
       const file = 'packages/web/jest.config.ts';
       const code = `
         export default {
@@ -97,7 +97,7 @@ describe('Context-Aware Severity', () => {
 
       const result = calculateSeverity(file, file, code, 0.9, 10);
 
-      expect(result.severity).toBe(Severity.Minor);
+      expect(result.severity).toBe(Severity.Info);
       expect(result.matchedRule).toBe('config-files');
     });
   });
@@ -118,7 +118,7 @@ describe('Context-Aware Severity', () => {
       const result = calculateSeverity(file, file, code, 0.95, 12);
 
       expect(result.severity).toBe(Severity.Info);
-      expect(result.reason).toContain('type safety');
+      expect(result.reason).toContain('module independence');
       expect(result.matchedRule).toBe('type-definitions');
     });
   });

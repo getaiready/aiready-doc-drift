@@ -5,11 +5,19 @@ const {
   mockDDSend,
   mockReportOverageCharge,
   mockSendCloudCostWarningEmail,
+  ResourceMock,
 } = vi.hoisted(() => ({
   mockCESend: vi.fn(),
   mockDDSend: vi.fn(),
   mockReportOverageCharge: vi.fn(),
   mockSendCloudCostWarningEmail: vi.fn(),
+  ResourceMock: {
+    ClawMoreTable: { name: 'test-table' },
+  },
+}));
+
+vi.mock('sst', () => ({
+  Resource: ResourceMock,
 }));
 
 vi.mock('@aws-sdk/client-cost-explorer', () => {
@@ -71,10 +79,14 @@ describe('cost-sync handler', () => {
     vi.clearAllMocks();
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    // Mock date to be mid-month so cost-sync doesn't skip (it skips on the 1st)
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-15T12:00:00Z'));
     process.env.DYNAMO_TABLE = 'test-table';
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 

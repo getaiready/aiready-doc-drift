@@ -1,6 +1,7 @@
 import { createPlatformSubscriptionSession } from '../lib/billing';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { Resource } from 'sst';
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
@@ -19,7 +20,7 @@ export const handler = async (event: any) => {
     // 1. Fetch existing customer ID if available
     const userRes = await ddb.send(
       new GetCommand({
-        TableName: process.env.DYNAMO_TABLE,
+        TableName: Resource.ClawMoreTable.name,
         Key: { PK: `USER#${userEmail}`, SK: 'METADATA' },
       })
     );
@@ -33,11 +34,10 @@ export const handler = async (event: any) => {
       userEmail,
       coEvolutionOptIn: !!coEvolutionOptIn,
       successUrl:
-        successUrl ||
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
+        successUrl || `${Resource.ClawMoreSite.url}/dashboard?checkout=success`,
       cancelUrl:
         cancelUrl ||
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=cancelled`,
+        `${Resource.ClawMoreSite.url}/dashboard?checkout=cancelled`,
     });
 
     return {

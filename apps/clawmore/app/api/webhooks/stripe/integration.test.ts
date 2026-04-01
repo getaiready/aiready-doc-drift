@@ -131,10 +131,16 @@ describe('Webhook → Provisioning → DB Integration', () => {
       id: 'sub_integration_123',
       items: {
         data: [
-          { id: 'si_base', price: { unit_amount: 2900 } },
+          {
+            id: 'si_base',
+            price: { unit_amount: 2900, metadata: { tier: 'starter' } },
+          },
           {
             id: 'si_mutation_tax',
-            price: { unit_amount: 100, recurring: { usage_type: 'metered' } },
+            price: {
+              unit_amount: 100,
+              recurring: { usage_type: 'metered' },
+            },
           },
         ],
       },
@@ -171,7 +177,8 @@ describe('Webhook → Provisioning → DB Integration', () => {
 
     // 8. Verify Subscription Retrieval
     expect(mockRetrieveSubscription).toHaveBeenCalledWith(
-      'sub_integration_123'
+      'sub_integration_123',
+      { expand: ['items.data.price'] }
     );
 
     // 9. Verify DB Update: User metadata with Stripe IDs and initial fuel
@@ -183,7 +190,7 @@ describe('Webhook → Provisioning → DB Integration', () => {
           ':customerId': 'cus_integration_123',
           ':subscriptionId': 'sub_integration_123',
           ':mutationItemId': 'si_mutation_tax',
-          ':plan': 'MANAGED',
+          ':plan': 'MANAGED_STARTER',
           ':initialFuel': 1000,
         }),
       })
@@ -220,13 +227,13 @@ describe('Webhook → Provisioning → DB Integration', () => {
         userId: mockUserId,
         userName: mockUserName,
         repoName: mockRepoName,
-        githubToken: 'ghp_test',
+        githubToken: 'github_test_mock',
         coEvolutionOptIn: false,
         sstSecrets: expect.objectContaining({
-          TelegramBotToken: '',
-          MiniMaxApiKey: '',
-          OpenAIApiKey: '',
-          GitHubToken: '',
+          TelegramBotToken: 'bot_test_mock',
+          MiniMaxApiKey: 'minimax_test_mock',
+          OpenAIApiKey: 'openai_test_mock',
+          GitHubToken: 'gh_test_mock',
         }),
       })
     );
@@ -269,10 +276,16 @@ describe('Webhook → Provisioning → DB Integration', () => {
       id: 'sub_fail_123',
       items: {
         data: [
-          { id: 'si_base', price: { unit_amount: 2900 } },
+          {
+            id: 'si_base',
+            price: { unit_amount: 2900, metadata: { tier: 'starter' } },
+          },
           {
             id: 'si_mutation_tax',
-            price: { unit_amount: 100, recurring: { usage_type: 'metered' } },
+            price: {
+              unit_amount: 100,
+              recurring: { usage_type: 'metered' },
+            },
           },
         ],
       },

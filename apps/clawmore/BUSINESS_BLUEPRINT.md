@@ -59,31 +59,153 @@ All client Spoke repositories are hosted as **Private Repos** within the `clawmo
 
 ## 🚀 4. Operational Roadmap (Scaling)
 
-### **Phase 1: Foundation (March 2026)**
+### **Phase 1: Foundation (Weeks 1-4)**
+
+**Technical Milestones:**
 
 - [x] AWS Organization Vending implementation.
 - [x] Stripe metered billing for Mutation Tax.
 - [x] "Evolution Tax" reporting logic.
+- [ ] **Security Hardening**: Remove hard-coded credentials, implement AWS Secrets Manager.
+- [ ] **Payment Integration**: Complete Stripe webhooks and subscription management.
+- [ ] **Observability Stack**: Implement error tracking (Sentry), structured logging, metrics.
 
-### **Phase 2: Expansion (Q2 2026)**
+**Success Metrics:**
+
+- Security: 0 critical vulnerabilities
+- Payment: > 99% success rate
+- Uptime: > 99.5%
+
+### **Phase 2: Launch & Growth (Months 2-3)**
+
+**Product Milestones:**
 
 - [ ] **Multi-Tenant Dashboard**: Real-time visualization of "Evolution ROI" for clients.
-- [ ] **Skill Marketplace**: Allow clients to "install" new agent capabilities (e.g., "SEO Agent," "Security Hardening Agent").
-- [x] **Automated Onboarding**: 1-click "Connect GitHub" -> "Deploy Managed AWS Node" (Via Warm Pool + GitHub Workflow Dispatch).
+- [ ] **Customer Portal**: Self-service billing and account management.
+- [x] **Automated Onboarding**: 1-click "Connect GitHub" -> "Deploy Managed AWS Node".
 
-### **Phase 3: Dominance (Q3 2026)**
+**Success Metrics:**
 
-- [ ] **Autonomous Upstream**: Clients' agents contribute successful refactors back to the Hub (with approval).
-- [ ] **The "Exit Tax"**: Logic for offboarding managed accounts while retaining IP for the evolution patterns.
+- Customer Acquisition: 50 customers
+- MRR: $5,000
+- Churn Rate: < 10%
+- NPS: > 30
+
+### **Phase 3: Scale (Months 4-6)**
+
+**Product Milestones:**
+
+- [ ] **Skill Marketplace**: Allow clients to "install" new agent capabilities.
+- [ ] **Advanced Analytics**: Usage dashboards and evolution reporting.
+- [ ] **API Access**: Programmatic access for enterprise integrations.
+
+**Success Metrics:**
+
+- Customer Count: 200
+- MRR: $20,000
+- Gross Margin: > 65%
+- LTV:CAC: > 2.5:1
+
+### **Phase 4: Expansion (Months 7-12)**
+
+**Product Milestones:**
+
+- [ ] **Autonomous Upstream**: Clients' agents contribute successful refactors back to the Hub.
+- [ ] **Enterprise Features**: SSO, audit logs, custom governance rules.
+- [ ] **The "Exit Tax"**: Logic for offboarding managed accounts while retaining IP.
+
+**Success Metrics:**
+
+- Customer Count: 500
+- MRR: $50,000
+- Market Share: > 0.5%
+- Evolution Adoption: > 30%
 
 ---
 
 **Status:** `READY_FOR_PROFIT`  
-**Managed By:** ClawMore Agentic Swarm
+**Managed By:** ClawMore Agentic Swarm  
+**Metrics Framework:** See [COMMERCIAL_SUCCESS_METRICS.md](./COMMERCIAL_SUCCESS_METRICS.md)
 
 ---
 
-## 🔗 5. Ecosystem Integration
+## 📊 5. Commercial Success Metrics
+
+### **Key Performance Indicators (KPIs)**
+
+| Category           | Metric                | Target              | Frequency    |
+| ------------------ | --------------------- | ------------------- | ------------ |
+| **Revenue**        | MRR                   | $5K → $50K → $100K+ | Monthly      |
+| **Unit Economics** | LTV:CAC               | > 3:1               | Quarterly    |
+| **Retention**      | Monthly Churn         | < 5%                | Monthly      |
+| **Quality**        | System Uptime         | 99.9%               | Monthly      |
+| **Product**        | Mutation Success Rate | > 95%               | Per mutation |
+
+### **Quality Excellence Targets**
+
+1. **Security**: Zero critical incidents, < 24 hour remediation
+2. **Performance**: < 500ms P95 API latency, 99.9% uptime
+3. **Customer Success**: NPS > 40, CSAT > 4.5/5
+4. **AI Quality**: > 95% mutation success, > 99% validation accuracy
+
+### **Growth Milestones**
+
+- **Month 3**: 50 customers, $5K MRR
+- **Month 6**: 200 customers, $20K MRR
+- **Month 12**: 500 customers, $50K MRR
+- **Month 24**: 1,000+ customers, $100K+ MRR
+
+### **Detailed Metrics Framework**
+
+For comprehensive metrics definitions, calculation formulas, and implementation roadmap, see [COMMERCIAL_SUCCESS_METRICS.md](./COMMERCIAL_SUCCESS_METRICS.md).
+
+---
+
+## 🔄 6. Safe Evolution Architecture
+
+### **Independent Evolution Strategy**
+
+ClawMore is designed to evolve independently from the underlying serverlessclaw technology through:
+
+1. **Adapter Pattern**: Versioned adapters translate between platform and core interfaces
+2. **Feature Flags**: Gradual rollout of new core features with rollback capability
+3. **Contract Testing**: Automated verification of interface compatibility
+4. **Canary Deployments**: 10% traffic testing before full rollout
+
+### **Evolution Separation Benefits**
+
+| Benefit                        | Description                       | Business Impact       |
+| ------------------------------ | --------------------------------- | --------------------- |
+| **Independent Release Cycles** | ClawMore can ship features weekly | Faster time-to-market |
+| **Risk Isolation**             | Core changes don't break platform | Higher reliability    |
+| **Client Migration Control**   | Gradual, tested upgrades          | Lower churn risk      |
+| **Innovation Freedom**         | Platform can experiment safely    | Competitive advantage |
+
+### **Key Evolution Metrics**
+
+| Metric                         | Target       | Purpose                          |
+| ------------------------------ | ------------ | -------------------------------- |
+| **Adapter Coverage**           | 100%         | All core features have adapters  |
+| **Contract Test Pass Rate**    | 100%         | Interface compatibility verified |
+| **Canary Error Rate**          | < 0.1%       | Early failure detection          |
+| **Migration Success Rate**     | > 99%        | Client upgrade reliability       |
+| **Independent Release Cycles** | 2-4/month    | Platform agility                 |
+| **Core Version Lag**           | < 2 versions | Stay current with core           |
+
+### **Implementation Roadmap**
+
+**Phase 1 (Weeks 1-2):** Define API contracts, create adapter pattern  
+**Phase 2 (Weeks 3-4):** Establish governance, add compatibility tests  
+**Phase 3 (Weeks 5-6):** Automate evolution, implement rollback  
+**Phase 4 (Ongoing):** Optimize performance, enhance monitoring
+
+### **Detailed Architecture**
+
+For complete architectural patterns, risk mitigation, and implementation details, see [EVOLUTION_SEPARATION.md](./EVOLUTION_SEPARATION.md).
+
+---
+
+## 🔗 7. Ecosystem Integration
 
 ClawMore is part of the broader AIReady ecosystem. See the [Organic Growth Strategy](../.github/platform/ORGANIC-GROWTH-STRATEGY.md) for how all components work together:
 

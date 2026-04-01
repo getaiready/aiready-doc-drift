@@ -68,6 +68,26 @@ While `git subtree` is the primitive, our architecture wraps it in a governance 
 - **The "Evolution Sandbox"**: Updates are first applied to a `sandbox` spoke to verify no breaking changes occur in the "Vending" logic.
 - **Contract Testing**: Ensuring API interfaces between Hub and Spoke remain compatible.
 
+### **Safe Evolution Patterns**
+
+The sync architecture implements safe evolution through:
+
+1. **Versioned Adapters**: ClawMore uses adapter pattern to translate between platform and core interfaces
+2. **Feature Flags**: Gradual rollout of new core features with rollback capability
+3. **Canary Deployments**: 10% traffic testing before full rollout
+4. **Compatibility Matrix**: Automated testing of version combinations
+
+For detailed architectural patterns, see [EVOLUTION_SEPARATION.md](./EVOLUTION_SEPARATION.md).
+
+### **Evolution Separation Metrics**
+
+| Metric                      | Target | Purpose                          |
+| --------------------------- | ------ | -------------------------------- |
+| **Adapter Coverage**        | 100%   | All core features have adapters  |
+| **Contract Test Pass Rate** | 100%   | Interface compatibility verified |
+| **Canary Error Rate**       | < 0.1% | Early failure detection          |
+| **Migration Success Rate**  | > 99%  | Client upgrade reliability       |
+
 ---
 
 ## 🚀 4. Automation: The Sync Swarm

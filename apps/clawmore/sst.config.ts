@@ -28,10 +28,25 @@ export default $config({
 
     // Configure the Stripe provider explicitly
     const stripeProvider = new (stripe as any).Provider('StripeProvider', {
-      apiKey: process.env.STRIPE_SECRET_KEY!,
+      apiKey:
+        process.env.STRIPE_SECRET_KEY || $app.stage === 'local'
+          ? 'sk_test_mock'
+          : undefined,
     });
 
     const domainName = isProd ? 'clawmore.ai' : `${$app.stage}.clawmore.ai`;
+
+    // --- Secrets (Security Hardening) ---
+    const StripeSecretKey = new sst.aws.Secret('StripeSecretKey');
+    const GithubServiceToken = new sst.aws.Secret('GithubServiceToken');
+    const OpenRouterApiKey = new sst.aws.Secret('OpenRouterApiKey');
+    const GithubClientSecret = new sst.aws.Secret('GithubClientSecret');
+    const GoogleClientSecret = new sst.aws.Secret('GoogleClientSecret');
+    const AdminPassword = new sst.aws.Secret('AdminPassword');
+    const SpokeTelegramBotToken = new sst.aws.Secret('SpokeTelegramBotToken');
+    const SpokeMiniMaxApiKey = new sst.aws.Secret('SpokeMiniMaxApiKey');
+    const SpokeOpenAIApiKey = new sst.aws.Secret('SpokeOpenAIApiKey');
+    const SpokeGithubToken = new sst.aws.Secret('SpokeGithubToken');
 
     // --- Stripe Products & Prices (IaC) ---
 
@@ -211,10 +226,7 @@ export default $config({
 
     const reportMutationTax = new sst.aws.Function('ReportMutationTax', {
       handler: 'functions/report-mutation-tax.handler',
-      link: [table],
-      environment: {
-        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
-      },
+      link: [table, StripeSecretKey],
     });
 
     bus.subscribe('MutationReporting', reportMutationTax.arn, {
@@ -239,10 +251,7 @@ export default $config({
 
     new sst.aws.Function('CreateCheckoutSession', {
       handler: 'functions/create-checkout-session.handler',
-      link: [table],
-      environment: {
-        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
-      },
+      link: [table, StripeSecretKey],
     });
 
     new sst.aws.Cron('CostSyncCron', {
@@ -250,16 +259,13 @@ export default $config({
       job: {
         handler: 'functions/cost-sync.handler',
         timeout: '5 minutes',
-        link: [table],
+        link: [table, StripeSecretKey],
         permissions: [
           {
             actions: ['ce:GetCostAndUsage', 'organizations:ListAccounts'],
             resources: ['*'],
           },
         ],
-        environment: {
-          STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
-        },
       },
     });
 
@@ -268,10 +274,7 @@ export default $config({
       job: {
         handler: 'functions/auto-topup-check.handler',
         timeout: '5 minutes',
-        link: [table],
-        environment: {
-          STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
-        },
+        link: [table, StripeSecretKey],
       },
     });
 
@@ -292,24 +295,11 @@ export default $config({
         LEAD_API_URL: api.url,
         LEADS_BUCKET: leads.name,
         DYNAMO_TABLE: table.name,
-        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
-        STRIPE_WEBHOOK_SECRET: webhookEndpoint.secret,
         NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
           process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
-        OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || '',
         CLAW_MORE_BUS: bus.name,
         GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || '',
-        GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || '',
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
-        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
-        GITHUB_SERVICE_TOKEN: process.env.GITHUB_SERVICE_TOKEN || '',
-        SPOKE_TELEGRAM_BOT_TOKEN: process.env.SPOKE_TELEGRAM_BOT_TOKEN || '',
-        SPOKE_MINIMAX_API_KEY: process.env.SPOKE_MINIMAX_API_KEY || '',
-        SPOKE_OPENAI_API_KEY: process.env.SPOKE_OPENAI_API_KEY || '',
-        SPOKE_GITHUB_TOKEN: process.env.SPOKE_GITHUB_TOKEN || '',
-        AUTH_SECRET:
-          process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || '',
-        ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',
         ADMIN_EMAILS: process.env.ADMIN_EMAILS || '',
         NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN || '',
         NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:
@@ -332,6 +322,16 @@ export default $config({
         teamPrice,
         fuelPackPrice,
         mutationTaxPrice,
+        StripeSecretKey,
+        GithubServiceToken,
+        OpenRouterApiKey,
+        GithubClientSecret,
+        GoogleClientSecret,
+        AdminPassword,
+        SpokeTelegramBotToken,
+        SpokeMiniMaxApiKey,
+        SpokeOpenAIApiKey,
+        SpokeGithubToken,
       ],
     });
 

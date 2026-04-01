@@ -11,6 +11,7 @@ import {
 } from '../../../../lib/email';
 import { addCredits } from '../../../../lib/db';
 import { createLogger } from '../../../../lib/logger';
+import { Resource } from 'sst';
 
 const log = createLogger('stripe-webhook');
 
@@ -19,10 +20,10 @@ const dbClient = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocument.from(dbClient);
-const TableName = process.env.DYNAMO_TABLE || '';
+const TableName = Resource.ClawMoreTable.name;
 
 export async function POST(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  const stripe = new Stripe(Resource.StripeSecretKey.value, {
     apiVersion: '2025-01-27-acacia' as any,
   });
 
@@ -79,12 +80,28 @@ export async function POST(req: NextRequest) {
 
               // Fetch the subscription to get individual item IDs (for metered usage)
               const subscription = await stripe.subscriptions.retrieve(
-                session.subscription as string
+                session.subscription as string,
+                { expand: ['items.data.price'] }
               );
+
+              // Find the platform plan tier from metadata
+              const platformItem = subscription.items.data.find(
+                (item: any) => item.price.metadata?.tier
+              );
+              const tier = platformItem?.price.metadata?.tier || 'starter';
+              const plan = `MANAGED_${tier.toUpperCase()}`;
+
+              // Determine initial fuel based on tier (Starter: $10, Pro: $50, Team: $150)
+              const initialFuelMap: Record<string, number> = {
+                starter: 1000,
+                pro: 5000,
+                team: 15000,
+              };
+              const initialFuel = initialFuelMap[tier] || 1000;
 
               // Find the metered price item for Mutation Tax
               const mutationTaxItem = subscription.items.data.find(
-                (item) =>
+                (item: any) =>
                   item.price.unit_amount === 100 &&
                   item.price.recurring?.usage_type === 'metered'
               );
@@ -94,15 +111,16 @@ export async function POST(req: NextRequest) {
                 TableName,
                 Key: { PK: `USER#${userId}`, SK: 'METADATA' },
                 UpdateExpression:
-                  'SET stripeCustomerId = :customerId, stripeSubscriptionId = :subscriptionId, stripeMutationSubscriptionItemId = :mutationItemId, plan = :plan, aiTokenBalanceCents = if_not_exists(aiTokenBalanceCents, :zero) + :initialFuel, coEvolutionOptIn = :coEvo',
+                  'SET stripeCustomerId = :customerId, stripeSubscriptionId = :subscriptionId, stripeMutationSubscriptionItemId = :mutationItemId, plan = :plan, aiTokenBalanceCents = if_not_exists(aiTokenBalanceCents, :zero) + :initialFuel, coEvolutionOptIn = :coEvo, tier = :tier',
                 ExpressionAttributeValues: {
                   ':customerId': session.customer as string,
                   ':subscriptionId': session.subscription as string,
                   ':mutationItemId': mutationTaxItem?.id || null,
-                  ':plan': 'MANAGED',
-                  ':initialFuel': 1000, // $10 initial fuel
+                  ':plan': plan,
+                  ':initialFuel': initialFuel,
                   ':zero': 0,
                   ':coEvo': session.metadata?.coEvolutionOptIn === 'true',
+                  ':tier': tier,
                 },
               });
 
@@ -121,7 +139,7 @@ export async function POST(req: NextRequest) {
               );
 
               // Trigger Autonomous Provisioning (awaited for status tracking)
-              const githubToken = process.env.GITHUB_SERVICE_TOKEN;
+              const githubToken = Resource.GithubServiceToken.value;
               if (githubToken && repoName) {
                 log.info(
                   { userId, email: userEmail },
@@ -152,11 +170,10 @@ export async function POST(req: NextRequest) {
                     coEvolutionOptIn:
                       session.metadata?.coEvolutionOptIn === 'true',
                     sstSecrets: {
-                      TelegramBotToken:
-                        process.env.SPOKE_TELEGRAM_BOT_TOKEN || '',
-                      MiniMaxApiKey: process.env.SPOKE_MINIMAX_API_KEY || '',
-                      OpenAIApiKey: process.env.SPOKE_OPENAI_API_KEY || '',
-                      GitHubToken: process.env.SPOKE_GITHUB_TOKEN || '',
+                      TelegramBotToken: Resource.SpokeTelegramBotToken.value,
+                      MiniMaxApiKey: Resource.SpokeMiniMaxApiKey.value,
+                      OpenAIApiKey: Resource.SpokeOpenAIApiKey.value,
+                      GitHubToken: Resource.SpokeGithubToken.value,
                     },
                   })
                   .then(async (result) => {

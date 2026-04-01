@@ -3,6 +3,7 @@ import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { reportMeteredUsage } from '../lib/billing';
 import { createMutationRecord } from '../lib/db';
 import { Harvester } from '../lib/evolution/harvester';
+import { Resource } from 'sst';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -28,7 +29,7 @@ export const handler = async (event: any) => {
     // 2. Fetch User Metadata for tax and harvesting
     const userRes = await docClient.send(
       new GetCommand({
-        TableName: process.env.DYNAMO_TABLE,
+        TableName: Resource.ClawMoreTable.name,
         Key: { PK: `USER#${userId}`, SK: 'METADATA' },
       })
     );
@@ -44,7 +45,7 @@ export const handler = async (event: any) => {
 
     // 3. Trigger Innovation Harvesting if opted in
     if (coEvolutionOptIn && owner && repoName) {
-      const githubToken = process.env.GITHUB_SERVICE_TOKEN;
+      const githubToken = Resource.GithubServiceToken.value;
       if (githubToken) {
         const harvester = new Harvester(githubToken);
         await harvester

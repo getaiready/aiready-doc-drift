@@ -7,6 +7,7 @@ import {
   sendAutoTopupFailedEmail,
   sendLowBalanceWarningEmail,
 } from '../lib/email';
+import { Resource } from 'sst';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -24,7 +25,7 @@ export const handler = async (_event: any) => {
   // Scan all user metadata records with autoTopupEnabled
   const scanResult = await docClient.send(
     new ScanCommand({
-      TableName: process.env.DYNAMO_TABLE,
+      TableName: Resource.ClawMoreTable.name,
       FilterExpression: 'EntityType = :type AND autoTopupEnabled = :enabled',
       ExpressionAttributeValues: {
         ':type': 'UserMetadata',
@@ -110,7 +111,7 @@ export const handler = async (_event: any) => {
         await docClient
           .send(
             new (await import('@aws-sdk/lib-dynamodb')).UpdateCommand({
-              TableName: process.env.DYNAMO_TABLE,
+              TableName: Resource.ClawMoreTable.name,
               Key: { PK: user.PK, SK: user.SK },
               UpdateExpression: 'SET lastLowBalanceWarningAt = :now',
               ExpressionAttributeValues: {
