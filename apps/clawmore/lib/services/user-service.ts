@@ -12,6 +12,7 @@ import {
 import { UserMetadata, ManagedAccountRecord } from '../types/models';
 import { KeyBuilder } from '../ddb/key-builder';
 import { UpdateBuilder } from '../ddb/update-builder';
+import { queryByPKPrefix, queryByGSI1 } from '../ddb/query-builder';
 import { dbConfig } from '../ddb/env-config';
 
 export class UserService {
@@ -67,14 +68,9 @@ export class UserService {
    */
   async getUserAccounts(email: string): Promise<ManagedAccountRecord[]> {
     const response = await this.docClient.send(
-      new QueryCommand({
-        TableName: dbConfig.tableName,
-        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk_prefix)',
-        ExpressionAttributeValues: {
-          ':pk': `USER#${email}`,
-          ':sk_prefix': 'ACCOUNT#',
-        },
-      })
+      new QueryCommand(
+        queryByPKPrefix(dbConfig.tableName, `USER#${email}`, 'ACCOUNT#')
+      )
     );
 
     const accountIds = (response.Items || []).map((item) =>
@@ -117,15 +113,7 @@ export class UserService {
    */
   async getUserStatus(email: string): Promise<string | null> {
     const response = await this.docClient.send(
-      new QueryCommand({
-        TableName: dbConfig.tableName,
-        IndexName: 'GSI1',
-        KeyConditionExpression: 'GSI1PK = :pk AND GSI1SK = :sk',
-        ExpressionAttributeValues: {
-          ':pk': 'USER',
-          ':sk': email,
-        },
-      })
+      new QueryCommand(queryByGSI1(dbConfig.tableName, 'USER', email))
     );
 
     return response.Items?.[0]?.status || null;

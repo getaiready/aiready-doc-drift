@@ -11,6 +11,7 @@ import {
 import { MutationRecord } from '../types/models';
 import { KeyBuilder } from '../ddb/key-builder';
 import { UpdateBuilder } from '../ddb/update-builder';
+import { QueryBuilder, queryByPKPrefix } from '../ddb/query-builder';
 import { dbConfig } from '../ddb/env-config';
 
 export interface CreateMutationInput {
@@ -69,18 +70,15 @@ export class MutationService {
     email: string,
     limit = 10
   ): Promise<MutationRecord[]> {
-    const response = await this.docClient.send(
-      new QueryCommand({
-        TableName: dbConfig.tableName,
-        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk_prefix)',
-        ExpressionAttributeValues: {
-          ':pk': `USER#${email}`,
-          ':sk_prefix': 'MUTATION#',
-        },
-        ScanIndexForward: false, // Descending order (recent first)
-        Limit: limit,
-      })
-    );
+    const queryParams = new QueryBuilder({
+      limit,
+      scanIndexForward: false, // Descending order (recent first)
+    })
+      .pk('PK', `USER#${email}`)
+      .sk('SK', 'begins', 'MUTATION#')
+      .build(dbConfig.tableName);
+
+    const response = await this.docClient.send(new QueryCommand(queryParams));
 
     return (response.Items || []) as MutationRecord[];
   }
