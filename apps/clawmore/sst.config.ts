@@ -1,3 +1,4 @@
+// @ts-nocheck - SST types are incomplete for many properties
 /// <reference path="./.sst/platform/config.d.ts" />
 /// <reference path="../../types/sst-stripe.d.ts" />
 
