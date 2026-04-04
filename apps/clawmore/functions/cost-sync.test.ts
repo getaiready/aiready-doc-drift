@@ -16,6 +16,10 @@ const {
   },
 }));
 
+vi.mock('../lib/metrics', () => ({
+  putMetric: vi.fn(),
+}));
+
 vi.mock('sst', () => ({
   Resource: ResourceMock,
 }));

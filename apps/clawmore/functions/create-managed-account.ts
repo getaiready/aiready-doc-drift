@@ -3,6 +3,7 @@ import {
   waitForAccountCreation,
   bootstrapManagedAccount,
 } from '../lib/aws/vending';
+import { putMetric } from '../lib/metrics';
 import { createServerlessSCP, attachSCPToAccount } from '../lib/aws/governance';
 import { CreateManagedAccountSchema } from '../lib/validation/schemas';
 
@@ -49,6 +50,12 @@ export const handler = async (event: any) => {
     );
     console.log(`Account bootstrapped with role: ${bootstrapRoleArn}`);
 
+    await putMetric({
+      name: 'ManagedAccountCreated',
+      value: 1,
+      unit: 'Count',
+    });
+
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -57,6 +64,12 @@ export const handler = async (event: any) => {
       }),
     };
   } catch (error: any) {
+    await putMetric({
+      name: 'ManagedAccountCreationErrors',
+      value: 1,
+      unit: 'Count',
+    });
+
     console.error('Error in create-managed-account handler:', error);
     return {
       statusCode: 500,

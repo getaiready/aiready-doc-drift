@@ -68,7 +68,7 @@ The "Evolution-as-a-Service" model is driven by a specialized sync architecture.
 
 **⚠️ Critical Gaps (per SYNC_ARCHITECTURE.md):**
 
-- [ ] Formalize `.sync-rules.json` to define file ownership (Phase 1)
+- [x] Formalize `.sync-rules.json` to define file ownership (Phase 1)
 - [ ] Build the "Contribution Dashboard" for Hub owner approval (Phase 3)
 - [ ] Implement conflict resolution with `ResolutionAgent` mediation
 - [ ] Establish "Evolution Sandbox" for pre-production validation
@@ -116,7 +116,7 @@ The "AI Fuel" system ensures agents never stop working due to lack of credits.
 
 **Critical Security Issues (per BUSINESS_BLUEPRINT.md Phase 1):**
 
-- [ ] **Security Hardening:** Remove hard-coded credentials, implement AWS Secrets Manager
+- [x] **Security Hardening:** Remove hard-coded credentials, implement AWS Secrets Manager
 - [ ] **Penetration Testing:** No evidence of security audit or pen testing
 - [ ] **Compliance:** No SOC 2, GDPR, or other compliance certifications
 - [ ] **Access Controls:** Missing role-based access control (RBAC) implementation
@@ -310,3 +310,4 @@ The "AI Fuel" system ensures agents never stop working due to lack of credits.
 **Next Review:** May 2026  
 **Owner:** ClawMore Product Team  
 **Reviewers:** Engineering, Security, Product, Operations
+, Security, Product, Operations

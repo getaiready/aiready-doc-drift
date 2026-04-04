@@ -124,7 +124,10 @@ export async function POST(req: NextRequest) {
                 TableName,
                 Key: { PK: `USER#${userId}`, SK: 'METADATA' },
                 UpdateExpression:
-                  'SET stripeCustomerId = :customerId, stripeSubscriptionId = :subscriptionId, stripeMutationSubscriptionItemId = :mutationItemId, plan = :plan, aiTokenBalanceCents = if_not_exists(aiTokenBalanceCents, :zero) + :initialFuel, coEvolutionOptIn = :coEvo, tier = :tier',
+                  'SET stripeCustomerId = :customerId, stripeSubscriptionId = :subscriptionId, stripeMutationSubscriptionItemId = :mutationItemId, plan = :plan, aiTokenBalanceCents = if_not_exists(aiTokenBalanceCents, :zero) + :initialFuel, coEvolutionOptIn = :coEvo, tier = :tier, GSI1PK = :gsi1pk, GSI1SK = :gsi1sk, email = :email, #name = :name',
+                ExpressionAttributeNames: {
+                  '#name': 'name',
+                },
                 ExpressionAttributeValues: {
                   ':customerId': session.customer as string,
                   ':subscriptionId': session.subscription as string,
@@ -134,6 +137,10 @@ export async function POST(req: NextRequest) {
                   ':zero': 0,
                   ':coEvo': session.metadata?.coEvolutionOptIn === 'true',
                   ':tier': tier,
+                  ':gsi1pk': `STRIPE#${session.customer}`,
+                  ':gsi1sk': userEmail,
+                  ':email': userEmail,
+                  ':name': userName,
                 },
               });
 
@@ -287,19 +294,16 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.paid': {
         const invoice = event.data.object as any;
-        const subscriptionId =
-          typeof invoice.subscription === 'string'
-            ? invoice.subscription
-            : invoice.subscription?.id;
+        const customerId = invoice.customer as string;
 
-        if (subscriptionId) {
-          // Find user by subscription ID
+        if (customerId) {
+          // Find user by Stripe customer ID
           const res = await docClient.query({
             TableName,
             IndexName: 'GSI1',
-            KeyConditionExpression: 'GSI1PK = :subscriptionId',
+            KeyConditionExpression: 'GSI1PK = :customerId',
             ExpressionAttributeValues: {
-              ':subscriptionId': `SUB#${subscriptionId}`,
+              ':customerId': `STRIPE#${customerId}`,
             },
           });
 
@@ -317,10 +321,7 @@ export async function POST(req: NextRequest) {
                 ':zero': 0,
               },
             });
-            log.info(
-              { userId, subscriptionId },
-              'Monthly AI credits replenished'
-            );
+            log.info({ userId, customerId }, 'Monthly AI credits replenished');
           }
         }
         break;

@@ -194,6 +194,8 @@ describe('Webhook → Provisioning → DB Integration', () => {
           ':mutationItemId': 'si_mutation_tax',
           ':plan': 'MANAGED_STARTER',
           ':initialFuel': 1000,
+          ':gsi1pk': 'STRIPE#cus_integration_123',
+          ':gsi1sk': mockUserEmail,
         }),
       })
     );
@@ -368,17 +370,18 @@ describe('Webhook → Provisioning → DB Integration', () => {
         object: {
           id: 'inv_paid_123',
           subscription: 'sub_paid_123',
+          customer: 'cus_paid_123',
         },
       },
     };
     mockConstructEvent.mockReturnValue(mockInvoice);
 
-    // Mock user lookup by subscription ID
+    // Mock user lookup by Stripe customer ID
     mockQuery.mockResolvedValue({
       Items: [
         {
           PK: 'USER#paiduser',
-          GSI1PK: 'SUB#sub_paid_123',
+          GSI1PK: 'STRIPE#cus_paid_123',
           email: 'paid@example.com',
         },
       ],

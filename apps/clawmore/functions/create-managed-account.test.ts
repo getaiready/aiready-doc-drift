@@ -3,6 +3,10 @@ import { handler } from './create-managed-account';
 import * as vending from '../lib/aws/vending';
 import * as governance from '../lib/aws/governance';
 
+vi.mock('../lib/metrics', () => ({
+  putMetric: vi.fn(),
+}));
+
 // Mock the libraries
 vi.mock('../lib/aws/vending', () => ({
   createManagedAccount: vi.fn(),

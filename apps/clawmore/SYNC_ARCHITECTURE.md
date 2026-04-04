@@ -113,7 +113,7 @@ To maintain Trunk-Based Development (TBD) integrity in the Mother repo (`serverl
 
 ## 📅 5. Implementation Roadmap
 
-- [ ] **Phase 1**: Formalize `.sync-rules.json` to define file ownership.
+- [x] **Phase 1**: Formalize `.sync-rules.json` to define file ownership.
 - [x] **Phase 2**: Implement the `Broadcaster` (via GitHub `workflow_dispatch`) to trigger initial deployments of forked Spokes.
 - [ ] **Phase 3**: Build the "Contribution Dashboard" for the Hub owner to approve incoming Spoke refactors.
 

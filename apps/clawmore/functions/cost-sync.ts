@@ -2,6 +2,7 @@ import {
   CostExplorerClient,
   GetCostAndUsageCommand,
 } from '@aws-sdk/client-cost-explorer';
+import { putMetric } from '../lib/metrics';
 import { format, startOfMonth } from 'date-fns';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
@@ -172,12 +173,23 @@ export const handler = async (_event: any) => {
       }
     }
 
+    await putMetric({
+      name: 'CostSyncAccountsProcessed',
+      value: results.length,
+      unit: 'Count',
+    });
+
     console.log(
       'Cost sync completed successfully.',
       results.length,
       'accounts processed.'
     );
   } catch (error) {
+    await putMetric({
+      name: 'CostSyncErrors',
+      value: 1,
+      unit: 'Count',
+    });
     console.error('Error during cost sync:', error);
     throw error;
   }

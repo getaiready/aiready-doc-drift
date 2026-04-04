@@ -66,7 +66,7 @@ All client Spoke repositories are hosted as **Private Repos** within the `clawmo
 - [x] AWS Organization Vending implementation.
 - [x] Stripe metered billing for Mutation Tax.
 - [x] "Evolution Tax" reporting logic.
-- [ ] **Security Hardening**: Remove hard-coded credentials, implement AWS Secrets Manager.
+- [x] **Security Hardening**: Remove hard-coded credentials, implement AWS Secrets Manager.
 - [ ] **Payment Integration**: Complete Stripe webhooks and subscription management.
 - [ ] **Observability Stack**: Implement error tracking (Sentry), structured logging, metrics.
 
